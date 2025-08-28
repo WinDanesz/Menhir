@@ -1,0 +1,33 @@
+{
+  "name": "the_hollow",
+  "required_mods": [
+    "ebwizardry",
+    "wizardryutils"
+  ],
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "ebwizardry:ward",
+        "amplifier": 0,
+        "duration": -1
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "wizardryutils.SpellPotency",
+        "amount": -0.25,
+        "operation": 1
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "spellshatter"
+      }
+    }
+  ]
+} 

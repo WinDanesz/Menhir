@@ -1,0 +1,40 @@
+{
+  "name": "the_golem",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "max_health",
+        "amount": 0.15,
+        "operation": 1
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "movement_speed",
+        "amount": -0.05,
+        "operation": 1
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "minecraft:resistance",
+        "amplifier": 1,
+        "duration": 300
+      }
+    },
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "minecraft:slowness",
+        "amplifier": 0,
+        "duration": 300
+      }
+    }
+  ]
+} 

@@ -1,0 +1,20 @@
+{
+  "name": "the_grove",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "verdant_bond",
+        "radius": 20
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "natures_embrace",
+        "radius": 3
+      }
+    }
+  ]
+}

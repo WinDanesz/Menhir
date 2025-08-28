@@ -1,0 +1,20 @@
+{
+  "name": "the_ender",
+  "active_daily_uses": 2,
+  "passive_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "spatial_slip"
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "twin_blink",
+        "range": 32.0
+      }
+    }
+  ]
+} 

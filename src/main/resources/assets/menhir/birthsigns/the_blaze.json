@@ -1,0 +1,23 @@
+{
+  "name": "the_blaze",
+  "active_daily_uses": 7,
+  "passive_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "fire_immunity",
+        "fire_immunity_duration": 600
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "blaze_fireball",
+        "speed_multiplier": 1.2,
+        "damage_multiplier": 1.5,
+        "spawn_distance": 2
+      }
+    }
+  ]
+} 

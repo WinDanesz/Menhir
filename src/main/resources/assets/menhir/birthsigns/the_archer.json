@@ -1,0 +1,17 @@
+{
+  "name": "the_archer",
+  "required_mods": [
+    "ebwizardry",
+    "wizardryutils"
+  ],
+  "active_daily_uses": 1,
+  "passive": [],
+  "active": [
+    {
+      "effect": {
+        "type": "spell_cast",
+        "spell": "ebwizardry:conjure_bow"
+      }
+    }
+  ]
+} 

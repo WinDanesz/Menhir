@@ -1,0 +1,11 @@
+{
+  "name": "the_charmer",
+  "active_daily_uses": 1,
+  "active": [
+    {
+      "effect": {
+        "type": "hero_of_village"
+      }
+    }
+  ]
+}

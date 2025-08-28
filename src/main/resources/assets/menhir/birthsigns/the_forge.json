@@ -1,0 +1,21 @@
+{
+  "name": "the_forge",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "burning_attack",
+        "ignite_chance": 0.20,
+        "ignite_duration": 3
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "repair_item",
+        "restore_percent": 0.25
+      }
+    }
+  ]
+}

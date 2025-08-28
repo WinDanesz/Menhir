@@ -1,0 +1,24 @@
+{
+  "name": "the_beast",
+  "required_mods": [
+    "ebwizardry",
+    "wizardryutils"
+  ],
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "heal_on_kill",
+        "amount": 0.5
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "spell_cast",
+        "spell": "ebwizardry:intimidate"
+      }
+    }
+  ]
+} 

@@ -1,0 +1,19 @@
+{
+  "name": "the_mountain",
+  "active_daily_uses": 10,
+  "passive": [
+    {
+      "effect": {
+        "type": "underground_haste"
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "block_placement",
+        "block": "minecraft:torch"
+      }
+    }
+  ]
+}

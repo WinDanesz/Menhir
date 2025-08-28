@@ -1,0 +1,31 @@
+{
+  "name": "the_conjuration",
+  "required_mods": [
+    "ebwizardry",
+    "wizardryutils"
+  ],
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "wizardry_spell_modifier",
+        "name": "duration",
+        "amount": 0.25
+      }
+    },
+    {
+      "effect": {
+        "type": "wizardry_spell_modifier",
+        "name": "cost",
+        "amount": 0.20
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "arcane_echo"
+      }
+    }
+  ]
+} 

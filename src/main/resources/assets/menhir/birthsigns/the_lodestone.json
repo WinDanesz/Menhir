@@ -1,0 +1,13 @@
+{
+  "name": "the_lodestone",
+  "active_daily_uses": 1,
+  "passive": [],
+  "active": [
+    {
+      "effect": {
+        "type": "channeling_teleport",
+        "teleport_destination": "spawn"
+      }
+    }
+  ]
+} 

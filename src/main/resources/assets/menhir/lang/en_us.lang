@@ -1,0 +1,58 @@
+# Birthsign Names
+birthsign.the_warrior.name=The Warrior
+birthsign.the_mage.name=The Mage
+birthsign.the_thief.name=The Thief
+birthsign.the_archer.name=The Archer
+birthsign.the_beast.name=The Beast
+birthsign.the_blaze.name=The Blaze
+birthsign.the_charmer.name=The Charmer
+birthsign.the_conjuration.name=The Conjuration
+birthsign.the_ender.name=The Ender
+birthsign.the_forge.name=The Forge
+birthsign.the_golem.name=The Golem
+birthsign.the_grove.name=The Grove
+birthsign.the_hollow.name=The Hollow
+birthsign.the_lodestone.name=The Lodestone
+birthsign.the_mountain.name=The Mountain
+birthsign.the_seer.name=The Seer
+
+# Block Names
+tile.menhir:menhir_stone.name=Menhir Stone
+
+# Item Names
+item.menhir:menhir_stone.name=Menhir Stone
+
+# Commands
+command.placemenhirstone.usage=/placemenhirstone <menhir_name>
+command.placemenhirstone.success=Menhir stone placed successfully with %s
+command.placemenhirstone.invalid_menhir=Invalid menhir name: %s
+command.placemenhirstone.failed=Failed to place menhir stone
+
+# Tooltips
+tooltip.menhir_stone.bound=Bound to: %s
+tooltip.menhir_stone.unbound=Unbound
+
+# Random Birthsign Assignment Messages
+message.menhir:random_menhir_assigned=You have been assigned the menhir: %s
+message.menhir:random_menhir_assignment_disabled=Random menhir assignment is disabled in the server configuration.
+message.menhir:menhir_already_assigned=You already have a menhir assigned: %s
+
+# The Seer Ability Messages
+menhir:the_seer.ebwizardry_required=ElectroBlob's Wizardry mod is required to use this ability.
+menhir:the_seer.no_wizard_data=Unable to access wizard data. Please try again.
+menhir:the_seer.no_item_mainhand=You must hold a spell book or scroll in your main hand.
+menhir:the_seer.not_spell_item=The item in your main hand must be a spell book or scroll.
+menhir:the_seer.invalid_spell=The spell book or scroll contains an invalid spell.
+menhir:the_seer.spell_already_known=You already know the spell: %s
+menhir:the_seer.spell_discovered=You have discovered the spell: %s
+menhir:the_seer.revelation_success=The Seer's revelation has granted you new magical knowledge!
+
+# Common Messages
+menhir:common.ability_recharged=Your menhir active abilities have been recharged!
+menhir:common.passive_recharged=Your menhir passive abilities have been recharged!
+menhir:common.teleport_safety=Spatial Slip activated! You teleported to safety.
+menhir:common.fire_shield=Your passive ability shields you from fire
+
+# Grove/Nature's Embrace Messages
+menhir.menhir:grove.blessing_success=Grove's Blessing! %d plants have been nourished with bonemeal in a %dx%d radius!
+menhir.menhir:grove.blessing_no_plants=Grove's Blessing activated, but no plants were found to nourish in the area.

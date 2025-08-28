@@ -1,0 +1,23 @@
+{
+  "name": "the_mage",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "wizardry_spell_modifier",
+        "name": "potency",
+        "amount": 0.10
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "ebwizardry:font_of_mana",
+        "amplifier": 0,
+        "duration": 300
+      }
+    }
+  ]
+} 

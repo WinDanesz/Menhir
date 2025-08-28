@@ -1,0 +1,38 @@
+{
+  "name": "the_thief",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "movement_speed",
+        "amount": 0.03,
+        "operation": 1
+      }
+    },
+    {
+      "effect": {
+        "type": "fall_damage_reduction",
+        "fall_damage_height_threshold": 6.0
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "minecraft:invisibility",
+        "amplifier": 0,
+        "duration": 200
+      }
+    },
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "minecraft:speed",
+        "amplifier": 0,
+        "duration": 400
+      }
+    }
+  ]
+} 

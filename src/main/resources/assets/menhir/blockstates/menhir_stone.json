@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "facing=north,position=bottom": {
+      "model": "menhir:menhir_stone_bottom",
+      "y": 0
+    },
+    "facing=north,position=middle": {
+      "model": "menhir:menhir_stone_middle",
+      "y": 0
+    },
+    "facing=north,position=top": {
+      "model": "menhir:menhir_stone_top",
+      "y": 0
+    },
+    "facing=south,position=bottom": {
+      "model": "menhir:menhir_stone_bottom",
+      "y": 180
+    },
+    "facing=south,position=middle": {
+      "model": "menhir:menhir_stone_middle",
+      "y": 180
+    },
+    "facing=south,position=top": {
+      "model": "menhir:menhir_stone_top",
+      "y": 180
+    },
+    "facing=west,position=bottom": {
+      "model": "menhir:menhir_stone_bottom",
+      "y": 270
+    },
+    "facing=west,position=middle": {
+      "model": "menhir:menhir_stone_middle",
+      "y": 270
+    },
+    "facing=west,position=top": {
+      "model": "menhir:menhir_stone_top",
+      "y": 270
+    },
+    "facing=east,position=bottom": {
+      "model": "menhir:menhir_stone_bottom",
+      "y": 90
+    },
+    "facing=east,position=middle": {
+      "model": "menhir:menhir_stone_middle",
+      "y": 90
+    },
+    "facing=east,position=top": {
+      "model": "menhir:menhir_stone_top",
+      "y": 90
+    }
+  }
+} 

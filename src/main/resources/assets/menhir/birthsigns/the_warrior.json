@@ -1,0 +1,40 @@
+{
+  "name": "the_warrior",
+  "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "attack_damage",
+        "amount": 0.10,
+        "operation": 1
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "armor",
+        "amount": 2.0,
+        "operation": 0
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "strength",
+        "amplifier": 1,
+        "duration": 300
+      }
+    },
+    {
+      "effect": {
+        "type": "potion_effect",
+        "potioneffect": "minecraft:resistance",
+        "amplifier": 0,
+        "duration": 200
+      }
+    }
+  ]
+} 
