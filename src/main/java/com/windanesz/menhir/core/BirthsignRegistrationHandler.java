@@ -5,7 +5,6 @@ import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.block.BlockMenhirStone;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -40,8 +39,8 @@ public final class BirthsignRegistrationHandler {
 
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> event) {
-		final ItemBlock itemBlock = new BlockMenhirStone.ItemBlockMenhirStone(MENHIR_STONE);
-		itemBlock.setRegistryName(MENHIR_STONE.getRegistryName());
-		event.getRegistry().register(itemBlock);
+		//final ItemBlock itemBlock = new BlockMenhirStone.ItemBlockMenhirStone(MENHIR_STONE);
+		//itemBlock.setRegistryName(MENHIR_STONE.getRegistryName());
+		//event.getRegistry().register(itemBlock);
 	}
 } 

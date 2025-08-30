@@ -63,5 +63,9 @@ public class Settings {
 		@Config.Comment("If true, automatically places menhir stone markers in Antique Atlas when menhir stones are generated in the world.")
 		public boolean auto_menhir_stone_markers = true;
 
+		@Config.Name("Disabled Birthsigns")
+		@Config.Comment("List of birthsigns to disable from registering. Use the format 'menhir:birthsign_name' (e.g., 'menhir:the_blaze'). Leave empty to enable all birthsigns.")
+		public String[] disabled_birthsigns = {};
+
 	}
 }

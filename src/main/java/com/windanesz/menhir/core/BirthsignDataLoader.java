@@ -66,6 +66,49 @@ public class BirthsignDataLoader {
 		return true;
 	}
 
+	/**
+	 * Checks if a birthsign is disabled in the config.
+	 *
+	 * @param birthsignName The name of the birthsign to check
+	 * @return true if the birthsign is disabled, false otherwise
+	 */
+	private static boolean isBirthsignDisabled(String birthsignName) {
+		if (birthsignName == null || birthsignName.isEmpty()) {
+			return false;
+		}
+
+		// Get the disabled birthsigns from config
+		String[] disabledBirthsigns = com.windanesz.menhir.Settings.generalSettings.disabled_birthsigns;
+		if (disabledBirthsigns == null || disabledBirthsigns.length == 0) {
+			return false;
+		}
+
+		// Check if the birthsign name matches any disabled entry
+		// Support both "menhir:birthsign_name" and "birthsign_name" formats
+		for (String disabledEntry : disabledBirthsigns) {
+			if (disabledEntry == null || disabledEntry.isEmpty()) {
+				continue;
+			}
+
+			// Check exact match
+			if (disabledEntry.equals(birthsignName)) {
+				return true;
+			}
+
+			// Check if it's in the format "menhir:birthsign_name" and matches the birthsign name
+			if (disabledEntry.startsWith("menhir:") && disabledEntry.substring(7).equals(birthsignName)) {
+				return true;
+			}
+
+			// Check if the birthsign name is in the format "menhir:birthsign_name" and matches the disabled entry
+			if (birthsignName.startsWith("menhir:") && birthsignName.substring(7).equals(disabledEntry)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public static List<Birthsign> loadBirthsignData() {
 		List<Birthsign> birthsigns = new ArrayList<>();
 		final int[] counters = {0, 0, 0, 0}; // [totalFilesFound, totalFilesProcessed, totalFilesLoaded, totalFilesSkipped]
@@ -211,6 +254,13 @@ public class BirthsignDataLoader {
 	private static void processBirthsign(Birthsign birthsign, List<Birthsign> birthsigns, int[] counters, String source) {
 		birthsign.activeAbilities = new ArrayList<>();
 		birthsign.spell_modifiers = new java.util.HashMap<>();
+
+		// Check if this birthsign is disabled in config
+		if (isBirthsignDisabled(birthsign.name)) {
+			counters[3]++; // totalFilesSkipped
+			Menhir.logger.info("Skipped birthsign '{}' - disabled in config (loaded from {})", birthsign.name, source);
+			return;
+		}
 
 		// Process passive effects to extract spell modifiers
 		if (birthsign.passive != null) {
