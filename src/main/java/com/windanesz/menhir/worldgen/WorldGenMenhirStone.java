@@ -7,6 +7,8 @@ import com.windanesz.menhir.block.BlockMenhirStone;
 import com.windanesz.menhir.core.BirthsignRegistrationHandler;
 import com.windanesz.menhir.integration.antiqueatlas.MenhirAntiqueAtlasIntegration;
 import com.windanesz.menhir.tileentity.TileEntityMenhirStone;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -398,41 +400,46 @@ public class WorldGenMenhirStone implements IWorldGenerator {
 		int targetChunkX = location.position.getX() >> 4;
 		int targetChunkZ = location.position.getZ() >> 4;
 
-		// Try neighboring chunks in a spiral pattern
-		int[] offsets = {1, -1, 2, -2, 3, -3}; // Try chunks at increasing distances
+		// Try neighboring chunks in order of preference based on terrain similarity
+		// Start with adjacent chunks, then move to diagonal ones
+		int[][] neighborOffsets = {
+			{0, 1}, {1, 0}, {0, -1}, {-1, 0},  // Adjacent chunks first
+			{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, // Diagonal chunks
+			{0, 2}, {2, 0}, {0, -2}, {-2, 0},  // Further adjacent
+			{1, 2}, {2, 1}, {2, -1}, {1, -2},  // Mixed distances
+			{-1, 2}, {-2, 1}, {-2, -1}, {-1, -2},
+			{2, 2}, {2, -2}, {-2, 2}, {-2, -2}  // Furthest diagonals
+		};
 
-		for (int offset : offsets) {
-			// Try all 8 neighboring directions
-			for (int dx = -1; dx <= 1; dx++) {
-				for (int dz = -1; dz <= 1; dz++) {
-					if (dx == 0 && dz == 0) continue; // Skip the center chunk
+		// Limit search to reasonable distance to avoid performance issues
+		int maxAttempts = Math.min(16, neighborOffsets.length);
 
-					int neighborChunkX = targetChunkX + (dx * offset);
-					int neighborChunkZ = targetChunkZ + (dz * offset);
+		for (int i = 0; i < maxAttempts; i++) {
+			int[] offset = neighborOffsets[i];
+			int neighborChunkX = targetChunkX + offset[0];
+			int neighborChunkZ = targetChunkZ + offset[1];
 
-					// Convert to block coordinates (center of chunk)
-					int blockX = neighborChunkX * 16 + 8;
-					int blockZ = neighborChunkZ * 16 + 8;
+			// Convert to block coordinates (center of chunk)
+			int blockX = neighborChunkX * 16 + 8;
+			int blockZ = neighborChunkZ * 16 + 8;
 
-					//Menhir.debug("Trying neighboring chunk ({}, {}) at block ({}, {}) for menhir '{}'",
-					//		neighborChunkX, neighborChunkZ, blockX, blockZ, location.birthsignName);
+			//Menhir.debug("Trying neighboring chunk ({}, {}) at block ({}, {}) for menhir '{}'",
+			//		neighborChunkX, neighborChunkZ, blockX, blockZ, location.birthsignName);
 
-					BlockPos actualPos = findSuitablePosition(world, blockX, blockZ);
-					if (actualPos != null) {
-						//Menhir.info("Found suitable position in neighboring chunk ({}, {}) for menhir '{}'",
-						//		neighborChunkX, neighborChunkZ, location.birthsignName);
+			BlockPos actualPos = findSuitablePosition(world, blockX, blockZ);
+			if (actualPos != null) {
+				//Menhir.info("Found suitable position in neighboring chunk ({}, {}) for menhir '{}'",
+				//		neighborChunkX, neighborChunkZ, location.birthsignName);
 
-						// Update the location to the new position
-						location.position = actualPos;
+				// Update the location to the new position
+				location.position = actualPos;
 
-						// Place the stone
-						return placeMenhirStone(world, actualPos, location.birthsignName);
-					}
-				}
+				// Place the stone
+				return placeMenhirStone(world, actualPos, location.birthsignName);
 			}
 		}
 
-		//Menhir.error("Could not find suitable position for menhir '{}' in target chunk or any neighboring chunks", location.birthsignName);
+		//Menhir.warn("Could not find suitable position for menhir '{}' in target chunk or {} neighboring chunks", location.birthsignName, maxAttempts);
 		return false;
 	}
 
@@ -509,19 +516,180 @@ public class WorldGenMenhirStone implements IWorldGenerator {
 	}
 
 	private BlockPos findSuitablePosition(World world, int x, int z) {
-		for (int y = world.getHeight() - 1; y > 0; y--) {
-			BlockPos pos = new BlockPos(x, y, z);
-			IBlockState state = world.getBlockState(pos);
+		// Sample terrain in a 5x5 area around the target position to find natural ground level
+		int sampleRadius = 2;
+		int totalHeight = 0;
+		int validSamples = 0;
+		int minHeight = Integer.MAX_VALUE;
+		int maxHeight = Integer.MIN_VALUE;
 
-			if (state.isFullBlock() && state.isFullCube() && state.getBlock() != Blocks.BEDROCK) {
-				BlockPos above = pos.up();
-				if (world.isAirBlock(above) && world.isAirBlock(above.up()) && world.isAirBlock(above.up(2))) {
-					return above;
+		// Sample surrounding terrain heights
+		for (int dx = -sampleRadius; dx <= sampleRadius; dx++) {
+			for (int dz = -sampleRadius; dz <= sampleRadius; dz++) {
+				int sampleX = x + dx * 3; // Sample every 3 blocks for performance
+				int sampleZ = z + dz * 3;
+
+				int groundY = findGroundLevel(world, sampleX, sampleZ);
+				if (groundY > 0) {
+					totalHeight += groundY;
+					validSamples++;
+					minHeight = Math.min(minHeight, groundY);
+					maxHeight = Math.max(maxHeight, groundY);
 				}
 			}
 		}
 
-		return null;
+		if (validSamples == 0) {
+			return null; // No valid terrain found
+		}
+
+		// Calculate average ground level, but bias toward lower areas to avoid floating
+		int avgHeight = totalHeight / validSamples;
+
+		// If terrain is too varied (more than 6 blocks difference), find a more stable area
+		if (maxHeight - minHeight > 6) {
+			// Use a more conservative approach - find the lowest stable point
+			avgHeight = Math.max(avgHeight - 2, minHeight + 1);
+		}
+
+		// Search for a suitable position near the target average height
+		for (int yOffset = -3; yOffset <= 3; yOffset++) {
+			int targetY = avgHeight + yOffset;
+
+			// Ensure we're within world bounds
+			if (targetY <= 0 || targetY >= world.getHeight() - 3) {
+				continue;
+			}
+
+			BlockPos pos = new BlockPos(x, targetY, z);
+			BlockPos foundation = pos.down();
+
+			// Check if foundation is stable and suitable
+			if (isStableFoundation(world, foundation) && hasClearance(world, pos, 3)) {
+				return pos;
+			}
+		}
+
+		// If no perfect spot found, try a more lenient search
+		return findLenientPosition(world, x, z, avgHeight);
+	}
+
+	/**
+	 * Finds the ground level at a specific position by scanning downward
+	 */
+	private int findGroundLevel(World world, int x, int z) {
+		// Start from a reasonable height and scan down
+		int startY = Math.min(world.getHeight() - 1, 100);
+
+		for (int y = startY; y > 0; y--) {
+			BlockPos pos = new BlockPos(x, y, z);
+			IBlockState state = world.getBlockState(pos);
+
+			// Check for solid ground that's not floating
+			if (state.isFullBlock() && state.isFullCube() && state.getBlock() != Blocks.BEDROCK) {
+				// Verify this isn't floating by checking blocks below
+				boolean hasSupport = false;
+				for (int checkY = y - 1; checkY >= Math.max(0, y - 5); checkY--) {
+					BlockPos checkPos = new BlockPos(x, checkY, z);
+					IBlockState checkState = world.getBlockState(checkPos);
+					if (checkState.isFullBlock() && checkState.isFullCube()) {
+						hasSupport = true;
+						break;
+					}
+				}
+
+				if (hasSupport) {
+					return y + 1; // Return position above the ground
+				}
+			}
+		}
+
+		return -1; // No suitable ground found
+	}
+
+	/**
+	 * Checks if a block is a stable foundation for menhir stones
+	 * Uses material and hardness-based detection for mod compatibility
+	 */
+	private boolean isStableFoundation(World world, BlockPos pos) {
+		IBlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+
+		// Must be a full, solid cube
+		if (!state.isFullBlock() || !state.isFullCube()) {
+			return false;
+		}
+
+		// Check block material - natural materials are generally good foundations
+		Material material = state.getMaterial();
+
+		// Excellent natural materials
+		if (material == Material.ROCK ||
+			material == Material.GROUND ||
+			material == Material.SAND ||
+			material == Material.GRASS ||
+			material == Material.CLAY) {
+			return true;
+		}
+
+		// Good materials for foundations (but check hardness)
+		if (material == Material.WOOD ||
+			material == Material.PLANTS ||
+			material == Material.ICE ||
+			material == Material.PACKED_ICE ||
+			material == Material.SNOW) {
+
+			// For these materials, also check hardness to avoid placing on leaves, etc.
+			float hardness = state.getBlockHardness(world, pos);
+			return hardness >= 0.0f && hardness <= 10.0f; // Reasonable hardness range
+		}
+
+		// For unknown materials, use hardness as a fallback
+		float hardness = state.getBlockHardness(world, pos);
+
+		// Accept blocks with reasonable hardness that aren't too hard (like unbreakable mod blocks)
+		return hardness >= 0.5f && hardness <= 50.0f &&
+			   !block.getRegistryName().toString().contains("machine") &&
+			   !block.getRegistryName().toString().contains("block") &&
+			   !block.getRegistryName().toString().contains("ore");
+	}
+
+	/**
+	 * Checks if there's clear space above a position for the full menhir stone
+	 */
+	private boolean hasClearance(World world, BlockPos basePos, int height) {
+		for (int i = 0; i < height; i++) {
+			BlockPos checkPos = basePos.up(i);
+			if (!world.isAirBlock(checkPos) && !world.getBlockState(checkPos).getBlock().isReplaceable(world, checkPos)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Fallback method for finding a position when the primary method fails
+	 */
+	private BlockPos findLenientPosition(World world, int x, int z, int preferredY) {
+		// Search in a wider vertical range with more lenient requirements
+		for (int y = preferredY - 8; y <= preferredY + 8; y++) {
+			if (y <= 0 || y >= world.getHeight() - 3) {
+				continue;
+			}
+
+			BlockPos pos = new BlockPos(x, y, z);
+			BlockPos foundation = pos.down();
+
+			// More lenient check - just need some solid block below
+			IBlockState foundationState = world.getBlockState(foundation);
+			if (foundationState.isFullBlock() && foundationState.isFullCube() &&
+				foundationState.getBlock() != Blocks.BEDROCK &&
+				hasClearance(world, pos, 3)) {
+				return pos;
+			}
+		}
+
+		return null; // Still couldn't find a position
 	}
 
 	private boolean placeMenhirStone(World world, BlockPos pos, String birthsignName) {
