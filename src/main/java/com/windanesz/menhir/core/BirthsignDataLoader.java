@@ -1,6 +1,9 @@
 package com.windanesz.menhir.core;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonParseException;
 import com.windanesz.menhir.Menhir;
 import com.windanesz.menhir.ability.ebwizardry.ArcaneEchoAbility;
 import com.windanesz.menhir.ability.minercaft.BlazeFireballAbility;
@@ -9,18 +12,17 @@ import com.windanesz.menhir.ability.minercaft.RevelationAbility;
 import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 
 public class BirthsignDataLoader {
 
@@ -116,12 +118,9 @@ public class BirthsignDataLoader {
 		try {
 			// Create Gson with custom deserializers
 			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.registerTypeAdapter(Birthsign.EffectType.class, new JsonDeserializer<Birthsign.EffectType>() {
-				@Override
-				public Birthsign.EffectType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-					String jsonName = json.getAsString();
-					return Birthsign.EffectType.fromJsonName(jsonName);
-				}
+			gsonBuilder.registerTypeAdapter(Birthsign.EffectType.class, (JsonDeserializer<Birthsign.EffectType>) (json, typeOfT, context) -> {
+				String jsonName = json.getAsString();
+				return Birthsign.EffectType.fromJsonName(jsonName);
 			});
 			gsonBuilder.registerTypeAdapter(Birthsign.EffectDetail.class, new EffectDetailDeserializer());
 			Gson gson = gsonBuilder.create();
@@ -147,81 +146,86 @@ public class BirthsignDataLoader {
 	 * Loads birthsigns JSON files from the config/menhir directory
 	 */
 	private static void loadBirthsignsFromConfigDirectory(List<Birthsign> birthsigns, Gson gson, int[] counters) {
-		try {
-			// Get the config directory path
-			File configDir = new File("config/menhir");
-			if (!configDir.exists() || !configDir.isDirectory()) {
-				Menhir.logger.debug("Config directory config/menhir does not exist, skipping");
-				return;
-			}
-
-			Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from config directory: {}", configDir.getAbsolutePath());
-
-			// Load from main config/menhir directory
-			loadBirthsignsFromDirectory(configDir, birthsigns, gson, counters, "config");
-
-			// Also check config/menhir/custom subdirectory if it exists
-			File customDir = new File(configDir, "custom");
-			if (customDir.exists() && customDir.isDirectory()) {
-				Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from custom config directory: {}", customDir.getAbsolutePath());
-				loadBirthsignsFromDirectory(customDir, birthsigns, gson, counters, "config/custom");
-			}
-
-		} catch (Exception e) {
-			Menhir.logger.error("BirthsignDataLoader: Error loading from config directory: {}", e.getMessage());
+		Menhir.logger.info("Loading birthsigns from config folder");
+		
+		File configDir = new File(Loader.instance().getConfigDir(), Menhir.MODID);
+		
+		if (!configDir.exists()) {
+			Menhir.logger.debug("Config directory does not exist, skipping custom birthsign loading");
+			return; // If there's no config folder, do nothing (like Wizardry)
+		}
+		
+		Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from config directory: {}", configDir.getAbsolutePath());
+		
+		// Load from main config/menhir directory
+		loadBirthsignsFromDirectory(configDir, birthsigns, gson, counters, "config");
+		
+		// Also check config/menhir/custom subdirectory if it exists
+		File customDir = new File(configDir, "custom");
+		if (customDir.exists() && customDir.isDirectory()) {
+			Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from custom config directory: {}", customDir.getAbsolutePath());
+			loadBirthsignsFromDirectory(customDir, birthsigns, gson, counters, "config/custom");
 		}
 	}
 
 	/**
-	 * Loads birthsign JSON files from the assets/menhir/birthsigns resource path
+	 * Loads birthsign JSON files from the assets/menhir/birthsigns resource path using CraftingHelper
 	 */
 	private static void loadBirthsignsFromAssets(List<Birthsign> birthsigns, Gson gson, int[] counters) {
 		try {
-			ClassLoader classLoader = BirthsignDataLoader.class.getClassLoader();
-			URL dirURL = classLoader.getResource("assets/menhir/birthsigns");
-
-			Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from assets: {}", dirURL);
-
-			if (dirURL != null && "jar".equals(dirURL.getProtocol())) {
-				// Handle JAR resources
-				Menhir.logger.info("BirthsignDataLoader: Processing JAR resources");
-				String jarPath = dirURL.getPath();
-				String jarFile = jarPath.substring(0, jarPath.indexOf("!"));
-				jarFile = jarFile.substring(jarFile.indexOf(":") + 1);
-				if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-					jarFile = jarFile.substring(1);
-				}
-
-				try (JarInputStream jarStream = new JarInputStream(Files.newInputStream(Paths.get(jarFile)))) {
-					JarEntry entry;
-					while ((entry = jarStream.getNextJarEntry()) != null) {
-						String name = entry.getName();
-						if (name.startsWith("assets/menhir/birthsigns/") && name.endsWith(".json")) {
-							counters[0]++; // totalFilesFound
-							Menhir.logger.debug("Found birthsigns file in JAR: {}", name);
-
-							try (InputStream stream = classLoader.getResourceAsStream(name)) {
-								if (stream != null) {
-									counters[1]++; // totalFilesProcessed
-									Birthsign birthsign = gson.fromJson(new InputStreamReader(stream), Birthsign.class);
-									processBirthsign(birthsign, birthsigns, counters, "jar:" + name);
-								}
-							}
-						}
-					}
-				} catch (IOException e) {
-					Menhir.logger.error("Error reading JAR file: {}", e.getMessage());
-				}
-			} else {
-				// Handle file system resources
-				Menhir.logger.info("BirthsignDataLoader: Processing file system resources");
-				File dir = new File(dirURL.toURI());
-				if (dir.exists() && dir.isDirectory()) {
-					loadBirthsignsFromDirectory(dir, birthsigns, gson, counters, "assets");
-				}
+			ModContainer mod = Loader.instance().getModList().stream()
+					.filter(m -> m.getModId().equals(Menhir.MODID))
+					.findFirst().orElse(null);
+			
+			if (mod == null) {
+				Menhir.logger.error("BirthsignDataLoader: Could not find mod container for {}", Menhir.MODID);
+				return;
 			}
+
+			Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from assets using CraftingHelper");
+
+			// Use CraftingHelper.findFiles - this method is reliable and used by Forge itself
+			boolean success = CraftingHelper.findFiles(mod, "assets/" + Menhir.MODID + "/birthsigns", null,
+					(root, file) -> {
+						String relative = root.relativize(file).toString();
+						if (!"json".equals(FilenameUtils.getExtension(file.toString())) || relative.startsWith("_")) {
+							return true; // True or it'll look like it failed just because it found a non-JSON file
+						}
+
+						counters[0]++; // totalFilesFound
+						String fileName = FilenameUtils.removeExtension(relative).replaceAll("\\\\", "/");
+						Menhir.logger.debug("BirthsignDataLoader: Processing birthsign file: {}", fileName);
+
+						BufferedReader reader = null;
+						try {
+							reader = Files.newBufferedReader(file);
+							counters[1]++; // totalFilesProcessed
+							
+							Birthsign birthsign = gson.fromJson(reader, Birthsign.class);
+							processBirthsign(birthsign, birthsigns, counters, "assets:" + fileName);
+							
+						} catch (JsonParseException jsonParseException) {
+							Menhir.logger.error("BirthsignDataLoader: Parsing error loading birthsign file {}", file, jsonParseException);
+							return false;
+						} catch (IOException ioException) {
+							Menhir.logger.error("BirthsignDataLoader: Couldn't read birthsign file {}", file, ioException);
+							return false;
+						} finally {
+							IOUtils.closeQuietly(reader);
+						}
+
+						return true;
+					},
+					true, true);
+
+			if (!success) {
+				Menhir.logger.error("BirthsignDataLoader: Failed to load birthsigns from assets");
+			} else {
+				Menhir.logger.info("BirthsignDataLoader: Successfully processed assets");
+			}
+			
 		} catch (Exception e) {
-			Menhir.logger.error("BirthsignDataLoader: Error loading from assets: {}", e.getMessage());
+			Menhir.logger.error("BirthsignDataLoader: Error loading from assets: {}", e.getMessage(), e);
 		}
 	}
 

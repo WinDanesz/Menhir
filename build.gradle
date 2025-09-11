@@ -25,7 +25,7 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:5.+'
         classpath 'org.ajoberstar.grgit:grgit-gradle:3.1.1'
         classpath group: 'wtf.gofancy.fancygradle', name: 'wtf.gofancy.fancygradle.gradle.plugin', version: '1.1.+'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        //classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 
     repositories.each {
@@ -36,7 +36,7 @@ buildscript {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
+//apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: org.ajoberstar.grgit.gradle.GrgitPlugin
@@ -65,11 +65,14 @@ minecraft {
 
     // accessTransformer = file('src/main/resources/META-INF/menhir_at.cfg')
 
-    def argsz = ["-Dmixin.debug.export=true",
-                '-Dmixin.hotSwap=true',
-                '-Dmixin.checks.interfaces=true',
+    def argsz = [
+
+            //"-Dmixin.debug.export=true",
+               // '-Dmixin.hotSwap=true',
+               // '-Dmixin.checks.interfaces=true',
                 '--username', 'WinDanesz', '--user', 'WinDanesz', '--uuid', '7faee354-8c60-4f5c-9862-fc0ce5f7f575',
-                '-Dfml.coreMods.load=' + coremod_plugin_class_name]
+               // '-Dfml.coreMods.load=' + coremod_plugin_class_name
+            ]
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
@@ -168,12 +171,12 @@ dependencies {
     implementation fg.deobf("curse.maven:artemislib-${artemislib_projectid}:${artemislib_fileid}")
     implementation fg.deobf("curse.maven:antique-atlas-${antiqueatlas_projectid}:${antiqueatlas_fileid}")
 
-    implementation ('zone.rong:mixinbooter:10.0') {
-        transitive = false
-    }
-    annotationProcessor ('zone.rong:mixinbooter:10.0') {
-        transitive = false
-    }
+   // implementation ('zone.rong:mixinbooter:10.0') {
+   //     transitive = false
+   // }
+   // annotationProcessor ('zone.rong:mixinbooter:10.0') {
+   //     transitive = false
+  //  }
 
 
     implementation fg.deobf("curse.maven:WizardryUtils-${wizardryutils_projectid}:${wizardryutils_fileid}")
@@ -199,12 +202,13 @@ jar {
                     "Implementation-Vendor"      : "WinDanesz",
                     "Implementation-Timestamp"   : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                     "Built-On-Java"              : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                    'TweakClass'                 : "org.spongepowered.asm.launch.MixinTweaker",
-                    "Built-On"                   : "${project.mc_version}-${project.forge_version}",
-                    "FMLCorePlugin"              : "com.windanesz.menhir.core.ASLoadingPlugin",
-                    "FMLCorePluginContainsFMLMod": true,
+                //    'TweakClass'                 : "org.spongepowered.asm.launch.MixinTweaker",
+                    "Built-On"                   : "${project.mc_version}-${project.forge_version}"])
+                   // "FMLCorePlugin"              : "com.windanesz.menhir.core.ASLoadingPlugin",
+                  //  "FMLCorePluginContainsFMLMod": true,
              //       "FMLAT"                      : "menhir_at.cfg",
-                    "ForceLoadAsMod"             : true])
+                  //  "ForceLoadAsMod"             : true]
+
     }
 }
 
@@ -394,15 +398,15 @@ compileJava {
 fancyGradle {
     patches {
         resources
-        coremods
-        asm
+//       // coremods
+        //asm
     }
 }
 
-mixin {
-    add sourceSets.main, "menhir.refmap.json"
-    disableAnnotationProcessorCheck()
-}
+//mixin {
+//    add sourceSets.main, "menhir.refmap.json"
+//    disableAnnotationProcessorCheck()
+//}
 
 publishing {
     publications {

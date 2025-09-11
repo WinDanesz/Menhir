@@ -23,7 +23,7 @@ public final class BirthsignRegistrationHandler {
 		IForgeRegistry<Birthsign> registry = event.getRegistry();
 		Birthsign.registry = registry;
 
-
+		Menhir.logger.info("Registering birthsigns");
 		List<Birthsign> birthsignToRegister = BirthsignDataLoader.loadBirthsignData();
 
 		for (Birthsign birthsign : birthsignToRegister) {
