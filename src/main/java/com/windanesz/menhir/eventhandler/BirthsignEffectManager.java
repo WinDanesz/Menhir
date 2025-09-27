@@ -45,7 +45,7 @@ public class BirthsignEffectManager {
 			if (eff.type == Birthsign.EffectType.ATTRIBUTE_MODIFIER) {
 				String attribute = eff.getParameter("attribute", "");
 				double amount = eff.getParameter("amount", 0.0);
-				int operation = getOperation(eff.getParameter("operation", "0"));
+				int operation = getOperation(String.valueOf(eff.getParameter("operation", 0)));
 				String attributeClass = eff.getParameter("attribute_class", "");
 				String attributeField = eff.getParameter("attribute_field", "");
 
@@ -241,7 +241,7 @@ public class BirthsignEffectManager {
 			if (eff.type == Birthsign.EffectType.ATTRIBUTE_MODIFIER) {
 				String attribute = eff.getParameter("attribute", "");
 				double amount = eff.getParameter("amount", 0.0);
-				int operation = getOperation(eff.getParameter("operation", "0"));
+				int operation = getOperation(String.valueOf(eff.getParameter("operation", 0)));
 				String attributeClass = eff.getParameter("attribute_class", "");
 				String attributeField = eff.getParameter("attribute_field", "");
 

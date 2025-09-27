@@ -1,12 +1,12 @@
 {
   "name": "the_blaze",
   "active_daily_uses": 7,
-  "passive_daily_uses": 1,
+  "passive_daily_uses": 3,
   "passive": [
     {
       "effect": {
         "type": "fire_immunity",
-        "fire_immunity_duration": 600
+        "fire_immunity_duration": 300
       }
     }
   ],
