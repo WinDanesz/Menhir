@@ -122,7 +122,7 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 		@SuppressWarnings("unchecked")
 		public <T> T getParameter(String key, T defaultValue) {
 			Object value = parameters.get(key);
-			if (value != null && defaultValue.getClass().isInstance(value)) {
+			if (value != null) {
 				return (T) value;
 			}
 			return defaultValue;

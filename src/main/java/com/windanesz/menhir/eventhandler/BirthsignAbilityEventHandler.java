@@ -12,6 +12,8 @@ import electroblob.wizardry.util.SpellModifiers;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -260,49 +262,30 @@ public class BirthsignAbilityEventHandler {
 
 		// Check if this birthsign has fire immunity
 		boolean hasFireImmunity = false;
-		int duration = 600; // Default 30 seconds (600 ticks)
+		int duration = 300;
 
 		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
 			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.FIRE_IMMUNITY) {
 				hasFireImmunity = true;
-				// Use custom duration if specified, otherwise use default
-				Integer fireDuration = effect.effect.getParameter("fire_immunity_duration", null);
+
+				Integer fireDuration = ((Long)effect.effect.getParameter("fire_immunity_duration", 1L)).intValue();
 				if (fireDuration != null) {
 					duration = fireDuration;
 				}
+
+				// Check if player has passive charges available
+				int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
+				if (currentPassiveCharges <= 0) {
+					return; // No passive charges available, can't use fire immunity
+				}
+
+				// Consume a passive charge
+				BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+
+				player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, duration));
+
 				break;
-			}
-		}
 
-		if (!hasFireImmunity) return;
-
-		// Check if the damage is from fire or lava
-		if (event.getSource() == DamageSource.IN_FIRE || event.getSource() == DamageSource.ON_FIRE || event.getSource() == DamageSource.LAVA) {
-
-			// Check if player has passive charges available
-			int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
-			if (currentPassiveCharges <= 0) {
-				return; // No passive charges available, can't use fire immunity
-			}
-
-			// Consume a passive charge
-			BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
-
-			// Apply fire resistance effect for the duration
-			net.minecraft.potion.Potion fireResistance = net.minecraft.potion.Potion.getPotionFromResourceLocation("minecraft:fire_resistance");
-			if (fireResistance != null) {
-				net.minecraft.potion.PotionEffect fireResistanceEffect = new net.minecraft.potion.PotionEffect(fireResistance, duration, 0, true, true);
-				player.addPotionEffect(fireResistanceEffect);
-			}
-
-			// Cancel the fire damage
-			event.setCanceled(true);
-
-			// Send message to player
-			player.sendMessage(new net.minecraft.util.text.TextComponentString("Your passive ability shields you from fire"));
-
-			if (Menhir.logger != null) {
-				Menhir.logger.info("Fire immunity activated for player {} with {} passive charges remaining", player.getName(), currentPassiveCharges - 1);
 			}
 		}
 	}

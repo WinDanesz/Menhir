@@ -55,7 +55,7 @@ public class BirthsignDataLoader {
 			return true; // No mod requirements
 		}
 
-		Menhir.logger.info("Checking mod requirements for birthsign '{}': {}", birthsign.name, birthsign.required_mods);
+		//Menhir.logger.info("Checking mod requirements for birthsign '{}': {}", birthsign.name, birthsign.required_mods);
 
 		for (String modId : birthsign.required_mods) {
 			if (!Loader.isModLoaded(modId)) {
@@ -158,13 +158,13 @@ public class BirthsignDataLoader {
 		Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from config directory: {}", configDir.getAbsolutePath());
 		
 		// Load from main config/menhir directory
-		loadBirthsignsFromDirectory(configDir, birthsigns, gson, counters, "config");
+		//loadBirthsignsFromDirectory(configDir, birthsigns, gson, counters, "config");
 		
 		// Also check config/menhir/custom subdirectory if it exists
-		File customDir = new File(configDir, "custom");
+		File customDir = new File(configDir, "");
 		if (customDir.exists() && customDir.isDirectory()) {
 			Menhir.logger.info("BirthsignDataLoader: Loading birthsigns from custom config directory: {}", customDir.getAbsolutePath());
-			loadBirthsignsFromDirectory(customDir, birthsigns, gson, counters, "config/custom");
+			loadBirthsignsFromDirectory(customDir, birthsigns, gson, counters, "config/menhir");
 		}
 	}
 
@@ -262,7 +262,7 @@ public class BirthsignDataLoader {
 		// Check if this birthsign is disabled in config
 		if (isBirthsignDisabled(birthsign.name)) {
 			counters[3]++; // totalFilesSkipped
-			Menhir.logger.info("Skipped birthsign '{}' - disabled in config (loaded from {})", birthsign.name, source);
+			//Menhir.logger.info("Skipped birthsign '{}' - disabled in config (loaded from {})", birthsign.name, source);
 			return;
 		}
 
@@ -303,7 +303,7 @@ public class BirthsignDataLoader {
 			Menhir.logger.info("Added birthsign '{}' to registry from {}", birthsign.name, source);
 		} else {
 			counters[3]++; // totalFilesSkipped
-			Menhir.logger.info("Skipped birthsign '{}' due to missing mod requirements (loaded from {})", birthsign.name, source);
+			Menhir.logger.info("Skipped birthsign '{}' due to missing mod requirements", birthsign.name);
 		}
 	}
 
