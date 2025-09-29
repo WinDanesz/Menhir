@@ -7,6 +7,7 @@ on:
 
 jobs:
   call-release-workflow:
+    permissions: write-all
     uses: WinDanesz/ModTools/.github/workflows/create_and_publish_release.yml@1.12.2
     secrets:
       CURSEFORGE_API_TOKEN: ${{ secrets.CURSEFORGE_API_TOKEN }}
