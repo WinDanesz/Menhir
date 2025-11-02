@@ -22,6 +22,7 @@ import java.util.List;
 public class ClientProxy extends CommonProxy {
 	private static final int TOOLTIP_WRAP_WIDTH = 140;
 	public static KeyBinding KEY_ACTIVATE_POWER;
+	public static KeyBinding KEY_SHOW_BIRTHSIGN;
 
 	public void init() {
 		registerKeybindings();
@@ -31,6 +32,9 @@ public class ClientProxy extends CommonProxy {
 	private void registerKeybindings() {
 		KEY_ACTIVATE_POWER = new KeyBinding("key.menhir.charm_bauble_activate", Keyboard.KEY_K, "key.menhir.category");
 		ClientRegistry.registerKeyBinding(KEY_ACTIVATE_POWER);
+		
+		KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir.show_birthsign", Keyboard.KEY_B, "key.menhir.category");
+		ClientRegistry.registerKeyBinding(KEY_SHOW_BIRTHSIGN);
 	}
 
 	public void registerRenderers() {

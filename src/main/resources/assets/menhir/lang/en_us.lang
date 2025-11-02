@@ -16,6 +16,42 @@ birthsign.the_lodestone.name=The Lodestone
 birthsign.the_mountain.name=The Mountain
 birthsign.the_seer.name=The Seer
 
+# Birthsign Descriptions
+birthsign.the_warrior.desc=Those born under the sign of The Warrior are natural combatants, skilled in battle and resilient in defense.
+birthsign.the_mage.desc=Those born under the sign of The Mage possess innate magical prowess and enhanced spell potency.
+birthsign.the_thief.desc=Those born under the sign of The Thief are swift and cunning, masters of stealth and agility.
+birthsign.the_archer.desc=Those born under the sign of The Archer are expert marksmen with unparalleled precision.
+birthsign.the_beast.desc=Those born under the sign of The Beast channel primal fury and animalistic strength.
+birthsign.the_blaze.desc=Those born under the sign of The Blaze command the fury of fire and are immune to its touch.
+birthsign.the_charmer.desc=Those born under the sign of The Charmer possess natural charisma and persuasive abilities.
+birthsign.the_conjuration.desc=Those born under the sign of The Conjuration excel at summoning and commanding otherworldly forces.
+birthsign.the_ender.desc=Those born under the sign of The Ender master the ability to teleport and traverse dimensions.
+birthsign.the_forge.desc=Those born under the sign of The Forge are blessed with the ability to craft and repair with supernatural skill.
+birthsign.the_golem.desc=Those born under the sign of The Golem possess unbreakable resilience and earthen might.
+birthsign.the_grove.desc=Those born under the sign of The Grove are one with nature, nurturing life around them.
+birthsign.the_hollow.desc=Those born under the sign of The Hollow walk between life and death, wielding necromantic power.
+birthsign.the_lodestone.desc=Those born under the sign of The Lodestone are anchored to the earth, drawing strength from below.
+birthsign.the_mountain.desc=Those born under the sign of The Mountain stand unyielding against all adversity.
+birthsign.the_seer.desc=Those born under the sign of The Seer possess foresight and the ability to unveil hidden knowledge.
+
+# Birthsign Lore
+birthsign.the_warrior.lore=The Warrior constellation shines brightest in times of conflict, guiding champions to glory.
+birthsign.the_mage.lore=The Mage constellation illuminates the path of those who seek arcane mastery.
+birthsign.the_thief.lore=The Thief constellation favors those who move unseen through the shadows.
+birthsign.the_archer.lore=The Archer constellation guides arrows true and steady to their mark.
+birthsign.the_beast.lore=The Beast constellation embodies raw, untamed power of the wild.
+birthsign.the_blaze.lore=The Blaze constellation burns eternal, a symbol of passionate fury.
+birthsign.the_charmer.lore=The Charmer constellation represents the power of words and influence.
+birthsign.the_conjuration.lore=The Conjuration constellation binds the paths between realms.
+birthsign.the_ender.lore=The Ender constellation marks those who transcend boundaries of space.
+birthsign.the_forge.lore=The Forge constellation symbolizes creation and the mastery of craft.
+birthsign.the_golem.lore=The Golem constellation represents unwavering strength and endurance.
+birthsign.the_grove.lore=The Grove constellation celebrates the eternal cycle of growth and renewal.
+birthsign.the_hollow.lore=The Hollow constellation dwells at the threshold between worlds.
+birthsign.the_lodestone.lore=The Lodestone constellation draws power from the deep earth.
+birthsign.the_mountain.lore=The Mountain constellation stands as an eternal monument to perseverance.
+birthsign.the_seer.lore=The Seer constellation reveals truths hidden from ordinary sight.
+
 # Block Names
 tile.menhir:menhir_stone.name=Menhir Stone
 
@@ -56,3 +92,15 @@ menhir:common.fire_shield=Your passive ability shields you from fire
 # Grove/Nature's Embrace Messages
 menhir.menhir:grove.blessing_success=Grove's Blessing! %d plants have been nourished with bonemeal in a %dx%d radius!
 menhir.menhir:grove.blessing_no_plants=Grove's Blessing activated, but no plants were found to nourish in the area.
+
+# GUI
+gui.menhir.birthsign.title=Birthsign
+gui.menhir.birthsign.no_birthsign=No Birthsign Assigned
+gui.menhir.birthsign.passive_abilities=Passive Abilities:
+gui.menhir.birthsign.active_abilities=Active Abilities:
+gui.menhir.birthsign.charges=Charges: %d/%d
+gui.menhir.birthsign.no_charges=No charges available
+
+# Keybindings
+key.menhir.show_birthsign=Show Birthsign
+key.menhir.category=Menhir
