@@ -125,17 +125,17 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 			if (value != null) {
 				// Handle numeric type conversions
 				if (defaultValue instanceof Integer && value instanceof Number) {
-					return (T) Integer.valueOf(((Number) value).intValue());
+					return (T) (Integer) ((Number) value).intValue();
 				} else if (defaultValue instanceof Long && value instanceof Number) {
-					return (T) Long.valueOf(((Number) value).longValue());
+					return (T) (Long) ((Number) value).longValue();
 				} else if (defaultValue instanceof Float && value instanceof Number) {
-					return (T) Float.valueOf(((Number) value).floatValue());
+					return (T) (Float) ((Number) value).floatValue();
 				} else if (defaultValue instanceof Double && value instanceof Number) {
-					return (T) Double.valueOf(((Number) value).doubleValue());
+					return (T) (Double) ((Number) value).doubleValue();
 				} else if (defaultValue instanceof Short && value instanceof Number) {
-					return (T) Short.valueOf(((Number) value).shortValue());
+					return (T) (Short) ((Number) value).shortValue();
 				} else if (defaultValue instanceof Byte && value instanceof Number) {
-					return (T) Byte.valueOf(((Number) value).byteValue());
+					return (T) (Byte) ((Number) value).byteValue();
 				}
 				return (T) value;
 			}
