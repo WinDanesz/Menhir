@@ -3,11 +3,11 @@ package com.windanesz.menhir.client.gui;
 import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
+import com.windanesz.menhir.client.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
