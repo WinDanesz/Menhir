@@ -20,6 +20,7 @@ public class GuiBirthsign extends GuiScreen {
 	private static final int GUI_HEIGHT = 200;
 	private static final int PADDING = 10;
 	private static final int LINE_HEIGHT = 10;
+	private static final String ACTIVE_USES_KEY = "active_uses";
 
 	private final EntityPlayer player;
 	private Birthsign birthsign;
@@ -120,7 +121,7 @@ public class GuiBirthsign extends GuiScreen {
 
 			// Draw available charges
 			if (birthsign.active_daily_uses > 0) {
-				int usedCharges = birthsignData != null ? birthsignData.getInt("active_uses") : 0;
+				int usedCharges = birthsignData != null ? birthsignData.getInt(ACTIVE_USES_KEY) : 0;
 				int availableCharges = birthsign.active_daily_uses - usedCharges;
 				String chargesText = I18n.format("gui.menhir.birthsign.charges", availableCharges, birthsign.active_daily_uses);
 				this.drawString(fontRenderer, chargesText, xOffset, yOffset, 0xFFFF55);
@@ -161,12 +162,12 @@ public class GuiBirthsign extends GuiScreen {
 
 	private String getEffectDescription(Birthsign.BirthsignEffect effect) {
 		if (effect == null || effect.effect == null) {
-			return "Unknown Effect";
+			return I18n.format("gui.menhir.birthsign.unknown_effect");
 		}
 
 		Birthsign.EffectType type = effect.effect.type;
 		if (type == null) {
-			return "Unknown Effect";
+			return I18n.format("gui.menhir.birthsign.unknown_effect");
 		}
 
 		switch (type) {
@@ -215,7 +216,10 @@ public class GuiBirthsign extends GuiScreen {
 
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-		if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Minecraft.getMinecraft().gameSettings.keyBindInventory.getKeyCode()) {
+		// Allow closing with ESC, inventory key, or the same key that opens the GUI
+		if (keyCode == Keyboard.KEY_ESCAPE 
+			|| keyCode == Minecraft.getMinecraft().gameSettings.keyBindInventory.getKeyCode()
+			|| (ClientProxy.KEY_SHOW_BIRTHSIGN != null && keyCode == ClientProxy.KEY_SHOW_BIRTHSIGN.getKeyCode())) {
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null) {
 				this.mc.setIngameFocus();

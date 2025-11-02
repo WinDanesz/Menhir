@@ -100,6 +100,7 @@ gui.menhir.birthsign.passive_abilities=Passive Abilities:
 gui.menhir.birthsign.active_abilities=Active Abilities:
 gui.menhir.birthsign.charges=Charges: %d/%d
 gui.menhir.birthsign.no_charges=No charges available
+gui.menhir.birthsign.unknown_effect=Unknown Effect
 
 # Keybindings
 key.menhir.show_birthsign=Show Birthsign
