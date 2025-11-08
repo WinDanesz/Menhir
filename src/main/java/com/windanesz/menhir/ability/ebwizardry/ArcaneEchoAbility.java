@@ -1,11 +1,10 @@
 package com.windanesz.menhir.ability.ebwizardry;
 
 import com.windanesz.menhir.Menhir;
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
 import electroblob.wizardry.data.WizardData;
-import electroblob.wizardry.event.SpellCastEvent;
 import electroblob.wizardry.item.ItemSpellBook;
 import electroblob.wizardry.spell.Spell;
 import electroblob.wizardry.util.SpellModifiers;
@@ -15,27 +14,27 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class ArcaneEchoAbility implements IBirthsignActiveAbility {
+public class ArcaneEchoAbility extends ChannelingAbility {
 
 	private static final String BOUND_SPELL_KEY = "arcane_echo_spell";
 	private static final String USES_KEY = "arcane_echo_uses";
 	private static final int MAX_USES_PER_DAY = 1;
 
-	public ArcaneEchoAbility() {
-		// Default constructor
+	public ArcaneEchoAbility(int chargeup) {
+		super(chargeup);
 	}
 
-	public static IBirthsignActiveAbility create(Map<String, Object> params) {
-		return new ArcaneEchoAbility();
+	public static ArcaneEchoAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
+		return new ArcaneEchoAbility(chargeup);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		IBirthsignData birthsignData = BirthsignDataProvider.get(player);
 		if (birthsignData == null) return false;
 
@@ -144,8 +143,7 @@ public class ArcaneEchoAbility implements IBirthsignActiveAbility {
 		}
 	}
 
-	private void postSpellCastEvent(EntityPlayer player, Spell spell) {
-		SpellModifiers modifiers = createFreeSpellModifiers();
-		MinecraftForge.EVENT_BUS.post(new SpellCastEvent.Post(SpellCastEvent.Source.COMMAND, spell, player, modifiers));
+	public void onNewDay(EntityPlayer player, IBirthsignData birthsignData) {
+		birthsignData.setInt(USES_KEY, MAX_USES_PER_DAY);
 	}
-} 
+}

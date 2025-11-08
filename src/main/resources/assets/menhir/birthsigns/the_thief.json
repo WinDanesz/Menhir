@@ -13,7 +13,7 @@
     {
       "effect": {
         "type": "fall_damage_reduction",
-        "fall_damage_height_threshold": 6.0
+        "fall_damage_height_threshold": 7.0
       }
     }
   ],

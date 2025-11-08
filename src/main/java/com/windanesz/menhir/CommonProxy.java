@@ -81,4 +81,14 @@ public class CommonProxy {
 
 	public void checkTranslationKeys() {
 	}
+
+	/**
+	 * Opens the birthsign selection GUI on client side.
+	 * Server-side does nothing.
+	 * 
+	 * @param player The player to open the GUI for
+	 */
+	public void openBirthsignSelectionGUI(net.minecraft.entity.player.EntityPlayer player) {
+		// Server-side does nothing
+	}
 }

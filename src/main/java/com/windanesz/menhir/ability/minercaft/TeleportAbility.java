@@ -1,5 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
+import com.windanesz.menhir.ability.ChannelingAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.util.ParameterUtils;
 import net.minecraft.entity.Entity;
@@ -12,54 +13,44 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class TeleportAbility implements IBirthsignActiveAbility {
+public class TeleportAbility extends ChannelingAbility {
 
 	private static final int DEFAULT_CHANNELING_TICKS = 60;
 	private static final String DEFAULT_TELEPORT_DESTINATION = "spawn";
-	private static final String DEBUG_PREFIX = "[Menhir] Lodestone: ";
-
-	private final int channelingTicks;
-	private final String teleportDestination;
 
 	public TeleportAbility() {
 		this(DEFAULT_CHANNELING_TICKS, DEFAULT_TELEPORT_DESTINATION);
 	}
 
 	public TeleportAbility(int channelingTicks, String teleportDestination) {
-		this.channelingTicks = channelingTicks;
-		this.teleportDestination = teleportDestination;
+		super(channelingTicks);
 	}
 
 	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
-		int channelingTicks = ParameterUtils.getIntParameter(params, "channeling_ticks", DEFAULT_CHANNELING_TICKS);
+		int chargeup = getChargeup(params, DEFAULT_CHANNELING_TICKS);
 		String teleportDest = ParameterUtils.getStringParameter(params, "teleport_destination", DEFAULT_TELEPORT_DESTINATION);
-		return new TeleportAbility(channelingTicks, teleportDest);
+		return new TeleportAbility(chargeup, teleportDest);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
-		// Only start channeling on the server side
-		if (!player.world.isRemote) {
-			performTeleport(player);
-			return true;
-			//ChannelingManager.startChanneling(player, this, channelingTicks);
-		}
-		return false;
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
+		return performTeleport(player);
 	}
 
-	public void performTeleport(EntityPlayer player) {
+	public boolean performTeleport(EntityPlayer player) {
 		// Only perform teleport on the server side
 		if (player.world.isRemote) {
-			return;
+			return false;
 		}
 
 		World world = player.world;
 		BlockPos teleportPos = findTeleportDestination(player, world);
 
 		if (teleportPos != null) {
-			executeTeleport(player, world, teleportPos);
+			return executeTeleport(player, world, teleportPos);
 		} else {
 			handleTeleportFailure(player);
+			return false;
 		}
 	}
 
@@ -93,30 +84,22 @@ public class TeleportAbility implements IBirthsignActiveAbility {
 		return worldSpawn;
 	}
 
-	private BlockPos createFallbackSpawn(World world) {
-		int fallbackY = world.getHeight();
-		return new BlockPos(0, fallbackY, 0);
-	}
-
-	private void executeTeleport(EntityPlayer player, World world, BlockPos teleportPos) {
-		TeleportCoordinates coords = calculateSafeTeleportCoordinates(world, teleportPos);
-
-		if (performTeleportOperation(player, world, coords)) {
-			handleSuccessfulTeleport(player, world, teleportPos);
-		} else {
-			handleTeleportFailure(player);
-		}
-	}
-
-	private TeleportCoordinates calculateSafeTeleportCoordinates(World world, BlockPos teleportPos) {
+	private boolean executeTeleport(EntityPlayer player, World world, BlockPos teleportPos) {
 		int safeY = findSafeTeleportHeight(world, teleportPos);
 		double x = teleportPos.getX() + 0.5;
 		double y = safeY + 1.0;
 		double z = teleportPos.getZ() + 0.5;
-		return new TeleportCoordinates(x, y, z);
+
+		if (performTeleportOperation(player, world, x, y, z)) {
+			handleSuccessfulTeleport(player, world, teleportPos);
+			return true;
+		} else {
+			handleTeleportFailure(player);
+			return false;
+		}
 	}
 
-	private boolean performTeleportOperation(EntityPlayer player, World world, TeleportCoordinates coords) {
+	private boolean performTeleportOperation(EntityPlayer player, World world, double x, double y, double z) {
 		try {
 			// Ensure we're on the server side
 			if (world.isRemote) {
@@ -128,13 +111,13 @@ public class TeleportAbility implements IBirthsignActiveAbility {
 				net.minecraft.entity.player.EntityPlayerMP playerMP = (net.minecraft.entity.player.EntityPlayerMP) player;
 
 				// Use the server-side teleport method which will sync to client
-				playerMP.connection.setPlayerLocation(coords.x, coords.y, coords.z, player.rotationYaw, player.rotationPitch);
+				playerMP.connection.setPlayerLocation(x, y, z, player.rotationYaw, player.rotationPitch);
 
 				// Clear motion and mark velocity as changed
 				clearPlayerMotion(player);
 
 				// Force a position update
-				player.setPosition(coords.x, coords.y, coords.z);
+				player.setPosition(x, y, z);
 
 				return true;
 			} else {
@@ -177,14 +160,4 @@ public class TeleportAbility implements IBirthsignActiveAbility {
 		}
 		return y;
 	}
-
-	private static class TeleportCoordinates {
-		final double x, y, z;
-
-		TeleportCoordinates(double x, double y, double z) {
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-	}
-} 
+}

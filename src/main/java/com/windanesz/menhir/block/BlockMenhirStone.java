@@ -18,6 +18,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -239,13 +240,24 @@ public class BlockMenhirStone extends Block {
 								String localizedbirthsignName = Menhir.proxy.translate("birthsign." + birthsignNameForTranslation + ".name");
 								playerIn.sendMessage(new TextComponentString("§eYou already have the " + localizedbirthsignName + " birthsign."));
 							} else {
-								// Check if birthsign stones can override existing birthsigns
-								if (Settings.generalSettings.menhir_stones_can_override_existing_birthsigns) {
-									// Allow override
-									birthsignData.setBirthsign(birthsignName);
-									BirthsignEffectManager.reapplyBirthsignEffects(playerIn, currentBirthsign, birthsignName);
+							// Check if birthsign stones can override existing birthsigns
+							if (Settings.generalSettings.menhir_stones_can_override_existing_birthsigns) {
+								// Allow override
+								birthsignData.setBirthsign(birthsignName);
+								
+								// Sync to client with full capability data
+								if (playerIn instanceof EntityPlayerMP) {
+									net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+									birthsignData.writeToNBT(nbt);
+									com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+										new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+										(EntityPlayerMP) playerIn
+									);
+								}
+								
+								BirthsignEffectManager.reapplyBirthsignEffects(playerIn, currentBirthsign, birthsignName);
 
-									// Extract birthsign names without modid prefix for translation
+								// Extract birthsign names without modid prefix for translation
 									String currentBirthsign1 = currentBirthsign;
 									if (currentBirthsign.contains(":")) {
 										currentBirthsign1 = currentBirthsign.split(":")[1];
@@ -279,12 +291,23 @@ public class BlockMenhirStone extends Block {
 									playerIn.sendMessage(new TextComponentString("§cYou already have the " + localizedCurrentBirthsign + " birthsign. Cannot change to " + localizedNewBirthsign + "."));
 								}
 							}
-						} else {
-							// Player has no birthsign, assign this one
-							birthsignData.setBirthsign(birthsignName);
-							BirthsignEffectManager.reapplyBirthsignEffects(playerIn, null, birthsignName);
+					} else {
+						// Player has no birthsign, assign this one
+						birthsignData.setBirthsign(birthsignName);
+						
+						// Sync to client with full capability data
+						if (playerIn instanceof EntityPlayerMP) {
+							net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+							birthsignData.writeToNBT(nbt);
+							com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+								new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+								(EntityPlayerMP) playerIn
+							);
+						}
+						
+						BirthsignEffectManager.reapplyBirthsignEffects(playerIn, null, birthsignName);
 
-							// Extract the birthsign name without modid prefix for translation
+						// Extract the birthsign name without modid prefix for translation
 							String birthsignNameForTranslation = birthsignName;
 							if (birthsignName.contains(":")) {
 								birthsignNameForTranslation = birthsignName.split(":")[1];

@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockSapling;
@@ -14,15 +14,17 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class VerdantBondAbility implements IBirthsignActiveAbility {
+public class VerdantBondAbility extends ChannelingAbility {
 
 	private final int radius;
 
-	public VerdantBondAbility(int radius) {
+	public VerdantBondAbility(int chargeup, int radius) {
+		super(chargeup);
 		this.radius = radius;
 	}
 
 	public static VerdantBondAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		int radius = 20; // Default 20 blocks
 
 		if (params.containsKey("radius")) {
@@ -32,12 +34,12 @@ public class VerdantBondAbility implements IBirthsignActiveAbility {
 			}
 		}
 
-		return new VerdantBondAbility(radius);
+		return new VerdantBondAbility(chargeup, radius);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
-		// This is a passive ability, not actively used
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
+		// This is a passive ability, so executeAbility is empty
 		// The actual effect is handled by the event handler
 		return false;
 	}

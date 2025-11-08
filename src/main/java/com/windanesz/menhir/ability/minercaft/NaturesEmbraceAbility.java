@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockSapling;
@@ -14,15 +14,17 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class NaturesEmbraceAbility implements IBirthsignActiveAbility {
+public class NaturesEmbraceAbility extends ChannelingAbility {
 
 	private final int radius;
 
-	public NaturesEmbraceAbility(int radius) {
+	public NaturesEmbraceAbility(int chargeup, int radius) {
+		super(chargeup);
 		this.radius = radius;
 	}
 
 	public static NaturesEmbraceAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		int radius = 3; // Default 3 blocks
 
 		if (params.containsKey("radius")) {
@@ -32,13 +34,12 @@ public class NaturesEmbraceAbility implements IBirthsignActiveAbility {
 			}
 		}
 
-		return new NaturesEmbraceAbility(radius);
+		return new NaturesEmbraceAbility(chargeup, radius);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		World world = player.world;
-		if (world.isRemote) return false; // Only run on server side
 
 		BlockPos playerPos = player.getPosition();
 		int radius = this.radius;
@@ -116,8 +117,7 @@ public class NaturesEmbraceAbility implements IBirthsignActiveAbility {
 				}
 			}
 		}
-
-		return true;
+		return plantsAffected > 0;
 	}
 
 	public int getRadius() {

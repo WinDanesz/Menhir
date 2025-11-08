@@ -17,7 +17,7 @@
       "effect": {
         "type": "wizardry_spell_modifier",
         "name": "cost",
-        "amount": 0.20
+        "amount": 0.15
       }
     }
   ],

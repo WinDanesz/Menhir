@@ -32,10 +32,13 @@ public class Settings {
 
 	public static class GeneralSettings {
 
-		@Config.Name("Random Birthsign Assignment")
-		@Config.Comment("If enabled, assigns a random birthsign to players when they join a world for the first time.")
-		public boolean random_birthsign_assignment = true;
+		@Config.Name("Allow Birthsign Selection On First Spawn")
+		@Config.Comment("If true, players can browse and choose their birthsign from a GUI when they first join the world. They can take their time to browse all birthsigns before selecting one. Takes priority over random assignment.")
+		public boolean allow_birthsign_selection_on_first_spawn = false;
 
+		@Config.Name("Random Birthsign Assignment")
+		@Config.Comment("If enabled, assigns a random birthsign to players when they join a world for the first time. Only works if 'Allow Birthsign Selection On First Spawn' is disabled.")
+		public boolean random_birthsign_assignment = true;
 		@Config.Name("Random Birthsign Assignment Message")
 		@Config.Comment("If true, displays a message to players when they are assigned a random birthsign.")
 		public boolean show_random_birthsign_message = true;
@@ -43,6 +46,10 @@ public class Settings {
 		@Config.Name("Birthsign Stones Can Override Existing Birthsigns")
 		@Config.Comment("If true, players can use birthsign stones to change their existing birthsign. If false, players cannot change their birthsign once assigned.")
 		public boolean menhir_stones_can_override_existing_birthsigns = true;
+
+		@Config.Name("Recharge Birthsign Charges On Respawn")
+		@Config.Comment("If true, players will have their birthsign charges (both active and passive) fully recharged when they respawn after death.")
+		public boolean recharge_charges_on_respawn = true;
 
 
 		@Config.Name("Max Birthsigns Per World")

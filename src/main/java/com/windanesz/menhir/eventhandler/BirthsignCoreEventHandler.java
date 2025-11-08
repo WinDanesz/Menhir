@@ -7,7 +7,10 @@ import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.BirthsignAttributeModifier;
 import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
+import com.windanesz.menhir.network.NetworkHandler;
+import com.windanesz.menhir.network.PacketSyncBirthsignData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -29,13 +32,34 @@ public class BirthsignCoreEventHandler {
 		EntityPlayer player = event.player;
 		String birthsignName = getPlayerBirthsign(player);
 
-		// Check if random birthsign assignment is enabled and player doesn't have a birthsign
+		// Sync birthsign data to client with full capability data
+		if (player instanceof EntityPlayerMP) {
+			IBirthsignData data = BirthsignDataProvider.get(player);
+			net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+			if (data != null) {
+				data.writeToNBT(nbt);
+			}
+			NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName != null ? birthsignName : "", nbt), (EntityPlayerMP) player);
+		}
+
+		// Check if player doesn't have a birthsign
 		if (birthsignName == null || birthsignName.isEmpty()) {
-			if (Settings.generalSettings.random_birthsign_assignment) {
+			// Check if random assignment is enabled (selection mode doesn't auto-assign, player chooses manually)
+			if (!Settings.generalSettings.allow_birthsign_selection_on_first_spawn && Settings.generalSettings.random_birthsign_assignment) {
 				// Assign a random birthsign to the player
 				String randomBirthsign = assignRandomBirthsign(player);
 				if (randomBirthsign != null) {
 					birthsignName = randomBirthsign;
+
+					// Sync the newly assigned birthsign to client with full capability data
+					if (player instanceof EntityPlayerMP) {
+						IBirthsignData data = BirthsignDataProvider.get(player);
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						if (data != null) {
+							data.writeToNBT(nbt);
+						}
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), (EntityPlayerMP) player);
+					}
 
 					// Show message if enabled
 					if (Settings.generalSettings.show_random_birthsign_message) {
@@ -84,11 +108,23 @@ public class BirthsignCoreEventHandler {
 			// But we need to reapply effects since the player entity is new
 			String birthsignName = getPlayerBirthsign(player);
 			if (birthsignName != null && !birthsignName.isEmpty()) {
+				// Sync birthsign data to client with full capability data
+				if (player instanceof EntityPlayerMP) {
+					IBirthsignData data = BirthsignDataProvider.get(player);
+					if (data != null) {
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						data.writeToNBT(nbt);
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), (EntityPlayerMP) player);
+					}
+				}
+				
 				// Reapply all birthsign effects to the new player entity
 				BirthsignEffectManager.applyPassiveBirthsignEffects(player, birthsignName);
-				// Recharge charges after respawn
-				BirthsignEffectManager.rechargeBirthsignCharges(player);
-				BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
+				// Recharge charges after respawn if enabled in config
+				if (Settings.generalSettings.recharge_charges_on_respawn) {
+					BirthsignEffectManager.rechargeBirthsignCharges(player);
+					BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
+				}
 			}
 		}
 	}
@@ -106,6 +142,17 @@ public class BirthsignCoreEventHandler {
 				if (Menhir.logger != null) {
 					Menhir.logger.info("Reapplying birthsign effects after dimension change for: {} with birthsign: {}", player.getName(), playerBirthsign);
 				}
+				
+				// Sync birthsign data to client with full capability data
+				if (player instanceof EntityPlayerMP) {
+					IBirthsignData data = BirthsignDataProvider.get(player);
+					if (data != null) {
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						data.writeToNBT(nbt);
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(playerBirthsign, nbt), (EntityPlayerMP) player);
+					}
+				}
+				
 				// Reapply effects after dimension change
 				BirthsignEffectManager.applyPassiveBirthsignEffects(player, playerBirthsign);
 			}
@@ -163,6 +210,13 @@ public class BirthsignCoreEventHandler {
 					cloneData.setInt("birthsign_remaining_charges", originalData.getInt("birthsign_remaining_charges"));
 					cloneData.setInt("birthsign_remaining_passive_charges", originalData.getInt("birthsign_remaining_passive_charges"));
 
+					// Sync to client with full capability data
+					if (clone instanceof EntityPlayerMP) {
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						cloneData.writeToNBT(nbt);
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), (EntityPlayerMP) clone);
+					}
+
 					if (Menhir.logger != null) {
 						Menhir.logger.info("CRITICAL: Transferred birthsign data from {} to clone: {} (wasDeath: {})",
 								original.getName(), birthsignName, wasDeath);
@@ -171,8 +225,8 @@ public class BirthsignCoreEventHandler {
 					// Apply birthsign effects to the clone immediately
 					BirthsignEffectManager.applyPassiveBirthsignEffects(clone, birthsignName);
 
-					// Recharge charges after respawn
-					if (wasDeath) {
+					// Recharge charges after respawn if enabled in config
+					if (wasDeath && Settings.generalSettings.recharge_charges_on_respawn) {
 						BirthsignEffectManager.rechargeBirthsignCharges(clone);
 						BirthsignEffectManager.rechargeBirthsignPassiveCharges(clone);
 					}
@@ -268,8 +322,11 @@ public class BirthsignCoreEventHandler {
 					if (eff.type == Birthsign.EffectType.POTION_EFFECT) {
 						// Reapply the potion effect using the same logic as PotionEffectAbility
 						String potionName = eff.getParameter("potioneffect", "");
-						int amplifier = eff.getParameter("amplifier", 0);
-						int duration = eff.getParameter("duration", 200);
+						// Handle both Integer and Long types from JSON
+						Number amplifierNum = eff.getParameter("amplifier", 0);
+						Number durationNum = eff.getParameter("duration", 200);
+						int amplifier = amplifierNum.intValue();
+						int duration = durationNum.intValue();
 						net.minecraft.potion.Potion potion = net.minecraft.potion.Potion.getPotionFromResourceLocation(potionName);
 						if (potion != null) {
 							net.minecraft.potion.PotionEffect potionEffect = new net.minecraft.potion.PotionEffect(potion, duration, amplifier, true, true);
@@ -279,7 +336,9 @@ public class BirthsignCoreEventHandler {
 						// Reapply attribute modifiers to ensure they're always present
 						String attribute = eff.getParameter("attribute", "");
 						double amount = eff.getParameter("amount", 0.0);
-						int operation = getOperation(String.valueOf(eff.getParameter("operation", 0)));
+						// Handle both Integer and Long types from JSON
+						Object operationObj = eff.getParameter("operation", 0);
+						int operation = getOperation(String.valueOf(operationObj));
 						String attributeClass = eff.getParameter("attribute_class", "");
 						String attributeField = eff.getParameter("attribute_field", "");
 

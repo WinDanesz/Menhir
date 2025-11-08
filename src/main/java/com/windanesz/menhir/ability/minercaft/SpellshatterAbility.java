@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
@@ -11,14 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SpellshatterAbility implements IBirthsignActiveAbility {
-	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
-		return new SpellshatterAbility();
+public class SpellshatterAbility extends ChannelingAbility {
+	
+	public SpellshatterAbility(int chargeup) {
+		super(chargeup);
+	}
+
+	public static SpellshatterAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
+		return new SpellshatterAbility(chargeup);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
-		if (player == null) return false;
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		// Remove all active potion effects safely
 		List<Potion> toRemove = new ArrayList<>();
 		for (PotionEffect effect : player.getActivePotionEffects()) {

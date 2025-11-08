@@ -1,5 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
+import com.windanesz.menhir.ability.ChannelingAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.util.ParameterUtils;
 import net.minecraft.block.Block;
@@ -19,12 +20,13 @@ import java.util.Map;
  * Generic block placement ability that allows players to place blocks where they're looking.
  * This is used by The Mountain birthsign and can be configured to place any block type.
  */
-public class BlockPlacementAbility implements IBirthsignActiveAbility {
+public class BlockPlacementAbility extends ChannelingAbility {
 
 	private static final int MAX_PLACEMENT_DISTANCE = 5; // Maximum distance to place blocks
 	private final String blockToPlace;
 
-	public BlockPlacementAbility(String blockToPlace) {
+	public BlockPlacementAbility(int chargeup, String blockToPlace) {
+		super(chargeup);
 		this.blockToPlace = blockToPlace;
 	}
 
@@ -32,12 +34,13 @@ public class BlockPlacementAbility implements IBirthsignActiveAbility {
 	 * Creates a new TorchPlacementAbility instance from parameters.
 	 */
 	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		String block = ParameterUtils.getStringParameter(params, "block", "minecraft:torch");
-		return new BlockPlacementAbility(block);
+		return new BlockPlacementAbility(chargeup, block);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		if (player == null || player.world == null) {
 			return false;
 		}
@@ -92,7 +95,6 @@ public class BlockPlacementAbility implements IBirthsignActiveAbility {
 			// Spawn block placement particles
 			spawnPlacementParticles(world, placementPos);
 		}
-
 		return success;
 	}
 

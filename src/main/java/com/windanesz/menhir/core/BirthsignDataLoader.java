@@ -5,10 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
 import com.windanesz.menhir.Menhir;
-import com.windanesz.menhir.ability.ebwizardry.ArcaneEchoAbility;
-import com.windanesz.menhir.ability.minercaft.BlazeFireballAbility;
-import com.windanesz.menhir.ability.minercaft.BlinkAbility;
-import com.windanesz.menhir.ability.minercaft.RevelationAbility;
 import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,30 +14,16 @@ import net.minecraftforge.fml.common.ModContainer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class BirthsignDataLoader {
-
-	// Static mapping from birthsign name to ability factory
-	private static final java.util.Map<String, AbilityFactory> BIRTHSIGN_ABILITY_FACTORIES = new java.util.HashMap<>();
-	// Static mapping from birthsign name to passive ability factory
-	private static final java.util.Map<String, PassiveAbilityFactory> birthsign_PASSIVE_ABILITY_FACTORIES = new java.util.HashMap<>();
-
-	static {
-		BIRTHSIGN_ABILITY_FACTORIES.put("the_blaze", BlazeFireballAbility::new);
-		BIRTHSIGN_ABILITY_FACTORIES.put("the_ender", () -> new BlinkAbility(32.0));
-		BIRTHSIGN_ABILITY_FACTORIES.put("the_conjuration", ArcaneEchoAbility::new);
-		BIRTHSIGN_ABILITY_FACTORIES.put("the_seer", RevelationAbility::new);
-
-		// Passive ability factories
-		// birthsign_PASSIVE_ABILITY_FACTORIES.put("the_seer", player -> () -> ThreatSenseAbility.checkAndApplyThreatSense(player));
-		// birthsign_ABILITY_FACTORIES.put("the_thief", com.windanesz.birthsigns.ability.ThiefSmokeAbility::new);
-		// Add more mappings as needed
-	}
 
 	/**
 	 * Checks if all required mods for a birthsign are loaded.
@@ -290,7 +272,14 @@ public class BirthsignDataLoader {
 						// Use the dynamic parameters map directly
 						Map<String, Object> params = new java.util.HashMap<>(eff.parameters);
 
-						birthsign.activeAbilities.add(com.windanesz.menhir.ability.AbilityFactory.create(eff.type.getJsonName(), params, birthsign.name));
+						try {
+							birthsign.activeAbilities.add(com.windanesz.menhir.ability.AbilityFactory.create(eff.type.getJsonName(), params, birthsign.name));
+						} catch (IllegalArgumentException e) {
+							Menhir.logger.error("Failed to crea ability '{}' for birthsign '{}' from {}: {}",
+								eff.type.getJsonName(), birthsign.name, source, e.getMessage());
+						}
+					} else {
+						Menhir.logger.warn("Birthsign '{}' has an unrecognised active ability type!", birthsign.name, source);
 					}
 				}
 			}
