@@ -22,12 +22,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Random;
 
-@Mod(modid = Menhir.MODID, name = Menhir.NAME, version = "@VERSION@", acceptedMinecraftVersions = "1.12.2", dependencies = Menhir.DEPENDENCIES)
+@Mod(modid = Menhir.MODID, name = Menhir.NAME, version = "1.1.0", acceptedMinecraftVersions = "1.12.2", dependencies = Menhir.DEPENDENCIES)
 public class Menhir {
 
 	public static final String MODID = "menhir";
 	public static final String NAME = "Menhir";
-	public static final String DEPENDENCIES = "after:ebwizardry@[@WIZARDRY_VERSION@,4.4);" + "after:wizardryutils@[1.2.2,);";
+	public static final String DEPENDENCIES = "after:ebwizardry@[4.3,4.4);" + "after:wizardryutils@[1.2.2,);";
 
 	public static final Random rand = new Random();
 
@@ -56,8 +56,6 @@ public class Menhir {
 		net.minecraft.tileentity.TileEntity.register("menhir_stone", TileEntityMenhirStone.class);
 
 		proxy.registerRenderers();
-		//	proxy.registerExtraHandbookContent();
-
 	}
 
 	@EventHandler
@@ -67,7 +65,6 @@ public class Menhir {
 		MinecraftForge.EVENT_BUS.register(new com.windanesz.menhir.eventhandler.ChannelingManager());
 		// Network must be registered on both sides
 		com.windanesz.menhir.network.NetworkHandler.registerMessages();
-//		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandlerAS());
 		proxy.registerParticles();
 		proxy.init();
 
@@ -76,7 +73,6 @@ public class Menhir {
 
 		// Register world generation for menhir stones
 		GameRegistry.registerWorldGenerator(new WorldGenMenhirStone(), 100); // Priority 100 (medium priority)
-		logger.info("Registered menhir stone world generation");
 	}
 
 	@EventHandler

@@ -12,6 +12,9 @@ public class NetworkHandler {
 		INSTANCE.registerMessage(PacketActivateBirthsignPower.Handler.class, PacketActivateBirthsignPower.class, 0, Side.SERVER);
 		INSTANCE.registerMessage(PacketStopChanneling.Handler.class, PacketStopChanneling.class, 1, Side.SERVER);
 		INSTANCE.registerMessage(PacketPlaceBlock.Handler.class, PacketPlaceBlock.class, 2, Side.SERVER);
+		INSTANCE.registerMessage(PacketSyncBirthsignData.Handler.class, PacketSyncBirthsignData.class, 3, Side.CLIENT);
+		INSTANCE.registerMessage(PacketSetBirthsign.Handler.class, PacketSetBirthsign.class, 4, Side.SERVER);
+		INSTANCE.registerMessage(PacketOpenBirthsignSelectionGUI.Handler.class, PacketOpenBirthsignSelectionGUI.class, 5, Side.CLIENT);
 	}
 
 	public static void sendToServer(Object message) {

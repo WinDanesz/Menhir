@@ -18,14 +18,29 @@ import java.util.Map;
 public class SpellCastAbility implements IBirthsignActiveAbility {
 
 	private final String spellName;
+	private final float potency;
+	private final float duration;
+	private final float blast;
+	private final float range;
+	private final float cooldown;
 
-	public SpellCastAbility(String spellName) {
+	public SpellCastAbility(String spellName, float potency, float duration, float blast, float range, float cooldown) {
 		this.spellName = spellName;
+		this.potency = potency;
+		this.duration = duration;
+		this.blast = blast;
+		this.range = range;
+		this.cooldown = cooldown;
 	}
 
 	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
 		String spell = ParameterUtils.getStringParameter(params, "spell", "");
-		return new SpellCastAbility(spell);
+		float potency = (float) ParameterUtils.getDoubleParameter(params, "potency", 1.0);
+		float duration = (float) ParameterUtils.getDoubleParameter(params, "duration", 1.0);
+		float blast = (float) ParameterUtils.getDoubleParameter(params, "blast", 1.0);
+		float range = (float) ParameterUtils.getDoubleParameter(params, "range", 1.0);
+		float cooldown = (float) ParameterUtils.getDoubleParameter(params, "cooldown", 1.0);
+		return new SpellCastAbility(spell, potency, duration, blast, range, cooldown);
 	}
 
 	@Override
@@ -73,7 +88,24 @@ public class SpellCastAbility implements IBirthsignActiveAbility {
 	}
 
 	private SpellModifiers createSpellModifiers() {
-		return new SpellModifiers();
+		SpellModifiers modifiers = new SpellModifiers();
+		// Apply configured modifiers if they differ from the default (1.0 = no change)
+		if (potency != 1.0f) {
+			modifiers.set("potency", potency, true);
+		}
+		if (duration != 1.0f) {
+			modifiers.set("duration", duration, true);
+		}
+		if (blast != 1.0f) {
+			modifiers.set("blast", blast, true);
+		}
+		if (range != 1.0f) {
+			modifiers.set("range", range, true);
+		}
+		if (cooldown != 1.0f) {
+			modifiers.set("cooldown", cooldown, true);
+		}
+		return modifiers;
 	}
 
 	private void startContinuousCasting(EntityPlayer player, Spell spell, SpellModifiers modifiers) {

@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class HeroOfVillageAbility implements IBirthsignActiveAbility {
+public class HeroOfVillageAbility extends ChannelingAbility {
 
 	// List of common items that villagers might give
 	private static final Item[] VILLAGER_ITEMS = {
@@ -30,11 +30,13 @@ public class HeroOfVillageAbility implements IBirthsignActiveAbility {
 	};
 	private final int duration;
 
-	public HeroOfVillageAbility(int duration) {
+	public HeroOfVillageAbility(int chargeup, int duration) {
+		super(chargeup);
 		this.duration = duration;
 	}
 
 	public static HeroOfVillageAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		int duration = 30; // Default 30 seconds
 
 		if (params.containsKey("duration")) {
@@ -44,11 +46,11 @@ public class HeroOfVillageAbility implements IBirthsignActiveAbility {
 			}
 		}
 
-		return new HeroOfVillageAbility(duration);
+		return new HeroOfVillageAbility(chargeup, duration);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		World world = player.world;
 
 		// Find nearby villagers
@@ -107,8 +109,7 @@ public class HeroOfVillageAbility implements IBirthsignActiveAbility {
 			player.sendMessage(new TextComponentString(TextFormatting.GREEN +
 					"Villagers are showering you with gifts!"));
 		}
-		return true;
-
+		return itemsThrown > 0;
 	}
 
 	public int getDuration() {

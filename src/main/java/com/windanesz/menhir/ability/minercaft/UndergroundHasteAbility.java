@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -9,16 +9,26 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * Conditional passive ability that gives Haste I when underground (Y ≤ 40) and holding a pickaxe.
  * This is used by The Mountain birthsign sign.
  */
-public class UndergroundHasteAbility implements IBirthsignActiveAbility {
+public class UndergroundHasteAbility extends ChannelingAbility {
 
 	private static final int UNDERGROUND_Y_LEVEL = 40;
 	private static final int HASTE_AMPLIFIER = 0; // Haste I
 	private static final int HASTE_DURATION = 200; // 10 seconds
+
+	public UndergroundHasteAbility(int chargeup) {
+		super(chargeup);
+	}
+
+	public static UndergroundHasteAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
+		return new UndergroundHasteAbility(chargeup);
+	}
 
 	/**
 	 * Checks if the player should have the Haste effect based on conditions.
@@ -65,8 +75,8 @@ public class UndergroundHasteAbility implements IBirthsignActiveAbility {
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
-		// This is a passive ability, so we don't actually activate it
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
+		// This is a passive ability, so executeAbility is empty
 		// The effect is applied continuously in the event handler
 		return false;
 	}

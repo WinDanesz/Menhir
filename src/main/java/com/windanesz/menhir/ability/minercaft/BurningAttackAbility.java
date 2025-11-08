@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,17 +8,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class BurningAttackAbility implements IBirthsignActiveAbility {
+public class BurningAttackAbility extends ChannelingAbility {
 
 	private final double igniteChance;
 	private final int igniteDuration;
 
-	public BurningAttackAbility(double igniteChance, int igniteDuration) {
+	public BurningAttackAbility(int chargeup, double igniteChance, int igniteDuration) {
+		super(chargeup);
 		this.igniteChance = igniteChance;
 		this.igniteDuration = igniteDuration;
 	}
 
 	public static BurningAttackAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		double igniteChance = 0.20; // Default 20%
 		int igniteDuration = 3; // Default 3 seconds
 
@@ -36,11 +38,11 @@ public class BurningAttackAbility implements IBirthsignActiveAbility {
 			}
 		}
 
-		return new BurningAttackAbility(igniteChance, igniteDuration);
+		return new BurningAttackAbility(chargeup, igniteChance, igniteDuration);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		// This is a passive ability, not actively used
 		// The actual effect is handled by the event handler
 		return false;

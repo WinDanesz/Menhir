@@ -22,15 +22,15 @@ public class AbilityFactory {
 		FACTORIES.put("lodestone_starbound", TeleportAbility::create);
 		FACTORIES.put("particle_effect", ParticleEffectAbility::create);
 		FACTORIES.put("channeling_teleport", TeleportAbility::create);
-		FACTORIES.put("arcane_echo", (params, birthsignName) -> ArcaneEchoAbility.create(params));
+		FACTORIES.put("arcane_echo", ArcaneEchoAbility::create);
 		FACTORIES.put("spell_cast", SpellCastAbility::create);
-		FACTORIES.put("revelation", (params, birthsignName) -> new RevelationAbility());
+		FACTORIES.put("revelation", RevelationAbility::create);
 		FACTORIES.put("burning_attack", BurningAttackAbility::create);
 		FACTORIES.put("repair_item", RepairItemAbility::create);
 		FACTORIES.put("hero_of_village", HeroOfVillageAbility::create);
 		FACTORIES.put("verdant_bond", VerdantBondAbility::create);
 		FACTORIES.put("natures_embrace", NaturesEmbraceAbility::create);
-		FACTORIES.put("underground_haste", (params, birthsignName) -> new UndergroundHasteAbility());
+		FACTORIES.put("underground_haste", UndergroundHasteAbility::create);
 		FACTORIES.put("block_placement", BlockPlacementAbility::create);
 		FACTORIES.put("give_item", GetItemAbility::create);
 		FACTORIES.put("heal_on_kill", HealOnKillAbility::create);

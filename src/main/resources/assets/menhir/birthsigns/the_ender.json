@@ -12,7 +12,7 @@
   "active": [
     {
       "effect": {
-        "type": "twin_blink",
+        "type": "blink",
         "range": 32.0
       }
     }

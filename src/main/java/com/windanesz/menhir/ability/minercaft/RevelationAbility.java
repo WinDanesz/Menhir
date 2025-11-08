@@ -1,7 +1,7 @@
 package com.windanesz.menhir.ability.minercaft;
 
 import com.windanesz.menhir.Menhir;
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import electroblob.wizardry.data.WizardData;
 import electroblob.wizardry.event.DiscoverSpellEvent;
 import electroblob.wizardry.item.ItemScroll;
@@ -15,12 +15,21 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
-public class RevelationAbility implements IBirthsignActiveAbility {
+public class RevelationAbility extends ChannelingAbility {
+
+	public RevelationAbility(int chargeup) {
+		super(chargeup);
+	}
+
+	public static RevelationAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
+		return new RevelationAbility(chargeup);
+	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
-		if (player == null || player.world.isRemote) return false;
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 
 		// Check if ElectroBlob's Wizardry is loaded
 		if (!Loader.isModLoaded("ebwizardry")) {
@@ -74,7 +83,6 @@ public class RevelationAbility implements IBirthsignActiveAbility {
 
 			// Send success message
 			player.sendMessage(new TextComponentTranslation(Menhir.MODID + ":" + "the_seer.revelation_success"));
-
 			return true;
 		}
 		return false;

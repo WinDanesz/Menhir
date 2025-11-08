@@ -95,7 +95,7 @@ public class BirthsignAbilityEventHandler {
 						if (effect.effect != null && effect.effect.type == Birthsign.EffectType.BURNING_ATTACK) {
 
 							double igniteChance = effect.effect.getParameter("ignite_chance", 0.20);
-							int igniteDuration = effect.effect.getParameter("ignite_duration", 3);
+							int igniteDuration = ((Number) effect.effect.getParameter("ignite_duration", 3)).intValue();
 
 							// Check if we should ignite the target
 							if (player.world.rand.nextDouble() < igniteChance) {
@@ -231,12 +231,27 @@ public class BirthsignAbilityEventHandler {
 				return; // No passive charges available, can't use spatial slip
 			}
 
-			player.world.playEvent(2003, player.getPosition(), 0); // Portal particles
+		player.world.playEvent(2003, player.getPosition(), 0); // Portal particles
 
-			// Consume a passive charge
-			BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+		// Consume a passive charge
+		BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+		
+		// Sync to client with full capability data
+		if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+			IBirthsignData data = BirthsignDataProvider.get(player);
+			if (birthsignName != null) {
+				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+				if (data != null) {
+					data.writeToNBT(nbt);
+				}
+				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+					(net.minecraft.entity.player.EntityPlayerMP) player
+				);
+			}
+		}
 
-			// Cancel the lethal damage
+		// Cancel the lethal damage
 			event.setCanceled(true);
 
 			// Send message to player
@@ -279,12 +294,23 @@ public class BirthsignAbilityEventHandler {
 					return; // No passive charges available, can't use fire immunity
 				}
 
-				// Consume a passive charge
-				BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+			// Consume a passive charge
+			BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+			
+			// Sync to client with full capability data
+			if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+				IBirthsignData data = BirthsignDataProvider.get(player);
+				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+				if (data != null) {
+					data.writeToNBT(nbt);
+				}
+				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+					(net.minecraft.entity.player.EntityPlayerMP) player
+				);
+			}
 
-				player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, duration));
-
-				break;
+			player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, duration));				break;
 
 			}
 		}

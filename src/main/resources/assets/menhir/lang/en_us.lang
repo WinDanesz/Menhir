@@ -1,58 +1,140 @@
-# Birthsign Names
-birthsign.the_warrior.name=The Warrior
-birthsign.the_mage.name=The Mage
-birthsign.the_thief.name=The Thief
 birthsign.the_archer.name=The Archer
+birthsign.the_archer.passive=-
+birthsign.the_archer.desc=Those born under the sign of The Archer are expert marksmen with unparalleled precision.
+birthsign.the_archer.lore=The Archer constellation guides arrows true and steady to their mark.
+birthsign.the_archer.active=Conjure a spirit bow that lasts 60 seconds
+
 birthsign.the_beast.name=The Beast
+birthsign.the_beast.desc=Those born under the sign of The Beast channel primal fury and animalistic strength.
+birthsign.the_beast.lore=The Beast constellation embodies raw, untamed power of the wild.
+birthsign.the_beast.passive=Feast: Heal 0.5 heart on every kill
+birthsign.the_beast.active=Roar: Unleash a ferocious roar that frightens nearby enemies
+
+birthsign.the_blaze.active=Flame Strike: Shoot a fireball
+birthsign.the_blaze.desc=Those born under the sign of The Blaze command the fury of fire and are immune to its touch.
+birthsign.the_blaze.lore=The Blaze constellation burns eternal, a symbol of passionate fury.
 birthsign.the_blaze.name=The Blaze
+birthsign.the_blaze.passive=Embercloak: Gain temporary fire resistance upon taking fire damage
+
+birthsign.the_charmer.desc=Those born under the sign of The Charmer possess natural charisma and persuasive abilities.
+birthsign.the_charmer.lore=The Charmer constellation represents the power of words and influence.
 birthsign.the_charmer.name=The Charmer
+birthsign.the_charmer.passive=-
+birthsign.the_charmer.active=Charm: Nearby villages treat you with a boon
+
+birthsign.the_conjuration.active=Arcane Echo: Once per day, if no spell is yet bound, you may bind the held spell book as your Arcane Echo spell. This consumes your use for the day. Future activations will cast the bound spell for free, without consuming mana or the scroll.
+birthsign.the_conjuration.desc=Those born under the sign of The Conjuration excel at summoning and commanding otherworldly forces.
+birthsign.the_conjuration.lore=The Conjuration constellation binds the paths between realms.
 birthsign.the_conjuration.name=The Conjuration
+birthsign.the_conjuration.passive=Lingering Magic: +25%% Spell duration but your spells cost 15%% more mana
+
 birthsign.the_ender.name=The Ender
+birthsign.the_ender.desc=Those born under the sign of The Ender master the ability to teleport and traverse dimensions.
+birthsign.the_ender.lore=The Ender constellation marks those who transcend boundaries of space.
+birthsign.the_ender.passive=Spatial Slip: Teleport to safety when falling
+birthsign.the_ender.active=Dimensional Step: Teleport a short distance in the direction you're looking
+
 birthsign.the_forge.name=The Forge
+birthsign.the_forge.desc=Those born under the sign of The Forge are blessed with the ability to craft and repair with supernatural skill.
+birthsign.the_forge.lore=The Forge constellation symbolizes creation and the mastery of craft.
+birthsign.the_forge.passive=Smoldering Strikes: Attacks have 20%% chance to set target on fire
+birthsign.the_forge.active=Rekindle: Restore 25%% durability of a held item
+
 birthsign.the_golem.name=The Golem
+birthsign.the_golem.desc=Those born under the sign of The Golem possess unbreakable resilience and earthen might.
+birthsign.the_golem.lore=The Golem constellation represents unwavering strength and endurance.
+birthsign.the_golem.passive=Ironbound: Your health is 15%% higher, but you move 5%% slower
+birthsign.the_golem.active=Ironwall: Gain Resistance II for and Slowness for 15 seconds
+
 birthsign.the_grove.name=The Grove
+birthsign.the_grove.desc=Those born under the sign of The Grove are one with nature, nurturing life around them.
+birthsign.the_grove.lore=The Grove constellation celebrates the eternal cycle of growth and renewal.
+birthsign.the_grove.passive=Verdant Bond: Nearby plants grow faster
+birthsign.the_grove.active=Nature's Embrace: Instantly nourish nearby plants
+
 birthsign.the_hollow.name=The Hollow
+birthsign.the_hollow.desc=Those born under the sign of The Hollow walk between life and death, wielding necromantic power.
+birthsign.the_hollow.lore=The Hollow constellation dwells at the threshold between worlds.
+birthsign.the_hollow.passive=Warding Mark:Gain the Ward effect, reducing magic damage taken. Your spells are 25%% less potent
+birthsign.the_hollow.active=Spellshatter: Remove any potion effect affecting you
+
 birthsign.the_lodestone.name=The Lodestone
+birthsign.the_lodestone.desc=Those born under the sign of The Lodestone are anchored to the earth, drawing strength from below.
+birthsign.the_lodestone.lore=The Lodestone constellation draws power from the deep earth.
+birthsign.the_lodestone.passive=-
+birthsign.the_lodestone.active=Starbound: Teleport to your spawn point
+
+birthsign.the_mage.name=The Mage
+birthsign.the_mage.desc=Those born under the sign of The Mage possess innate magical prowess and enhanced spell potency.
+birthsign.the_mage.lore=The Mage constellation illuminates the path of those who seek arcane mastery.
+birthsign.the_mage.passive=Arcane Affinity: Your spells are 10%% more potent
+birthsign.the_mage.active=Mana Surge: Gain Font of Mana for 15 seconds
+
 birthsign.the_mountain.name=The Mountain
+birthsign.the_mountain.desc=Those born under the sign of The Mountain stand unyielding against all adversity.
+birthsign.the_mountain.lore=The Mountain constellation stands as an eternal monument to perseverance.
+birthsign.the_mountain.passive=Stoneborn: Gain Haste underground (40 blocks and below)
+birthsign.the_mountain.active=Torchlight: Place a torch
+
 birthsign.the_seer.name=The Seer
+birthsign.the_seer.desc=Those born under the sign of The Seer possess foresight and the ability to unveil hidden knowledge.
+birthsign.the_seer.lore=The Seer constellation reveals truths hidden from ordinary sight.
+birthsign.the_seer.passive=Threat Sense: When your health drops below 33%%, nearby hostile mobs become Glowing
+birthsign.the_seer.active=Revelation: Discover an unknown, held spell book
 
-# Block Names
-tile.menhir:menhir_stone.name=Menhir Stone
+birthsign.the_thief.name=The Thief
+birthsign.the_thief.desc=Those born under the sign of The Thief are swift and cunning, masters of stealth and agility.
+birthsign.the_thief.lore=The Thief constellation favors those who move unseen through the shadows.
+birthsign.the_thief.passive=Featherstep: Your safe fall distance is enhanced and you move 3%% faster
+birthsign.the_thief.active=Shadowstep: become invisible for 10 seconds and gain speed for twice that duration
 
-# Item Names
-item.menhir:menhir_stone.name=Menhir Stone
+birthsign.the_warrior.name=The Warrior
+birthsign.the_warrior.desc=Those born under the sign of The Warrior are natural combatants, skilled in battle and resilient in defense.
+birthsign.the_warrior.lore=The Warrior constellation shines brightest in times of conflict, guiding champions to glory.
+birthsign.the_warrior.passive=Path of War: Deal 10%% more damage with melee weapons and gain 2 Armor
+birthsign.the_warrior.active=Berserk: Gain Strength and Resistance for a short duration
 
-# Commands
-command.placemenhirstone.usage=/placemenhirstone <menhir_name>
-command.placemenhirstone.success=Menhir stone placed successfully with %s
-command.placemenhirstone.invalid_menhir=Invalid menhir name: %s
 command.placemenhirstone.failed=Failed to place menhir stone
+command.placemenhirstone.invalid_menhir=Invalid menhir name: %s
+command.placemenhirstone.success=Menhir stone placed successfully with %s
+command.placemenhirstone.usage=/placemenhirstone <menhir_name>
 
-# Tooltips
-tooltip.menhir_stone.bound=Bound to: %s
-tooltip.menhir_stone.unbound=Unbound
+gui.menhir.birthsign.active_abilities=Active Abilities
+gui.menhir.birthsign.charges=Charges: %d/%d
+gui.menhir.birthsign.daily_charges=Daily Charges: %d
+gui.menhir.birthsign.no_birthsign=No Birthsign Assigned
+gui.menhir.birthsign.no_charges=No charges available
+gui.menhir.birthsign.not_yours=(Not Your Birthsign)
+gui.menhir.birthsign.passive_abilities=Passive Abilities
+gui.menhir.birthsign.select=Choose This Birthsign
+gui.menhir.birthsign.selected=You have chosen the birthsign: %s
+gui.menhir.birthsign.title=Birthsign
+gui.menhir.birthsign.unknown_effect=Unknown Effect
 
-# Random Birthsign Assignment Messages
-message.menhir:random_menhir_assigned=You have been assigned the menhir: %s
-message.menhir:random_menhir_assignment_disabled=Random menhir assignment is disabled in the server configuration.
-message.menhir:menhir_already_assigned=You already have a menhir assigned: %s
+item.menhir:menhir_stone.name=Menhir Stone
+key.menhir.category=Menhir
+key.menhir.show_birthsign=Show Birthsign
 
-# The Seer Ability Messages
-menhir:the_seer.ebwizardry_required=ElectroBlob's Wizardry mod is required to use this ability.
-menhir:the_seer.no_wizard_data=Unable to access wizard data. Please try again.
-menhir:the_seer.no_item_mainhand=You must hold a spell book or scroll in your main hand.
-menhir:the_seer.not_spell_item=The item in your main hand must be a spell book or scroll.
-menhir:the_seer.invalid_spell=The spell book or scroll contains an invalid spell.
-menhir:the_seer.spell_already_known=You already know the spell: %s
-menhir:the_seer.spell_discovered=You have discovered the spell: %s
-menhir:the_seer.revelation_success=The Seer's revelation has granted you new magical knowledge!
-
-# Common Messages
 menhir:common.ability_recharged=Your menhir active abilities have been recharged!
+menhir:common.fire_shield=Your passive ability shields you from fire
 menhir:common.passive_recharged=Your menhir passive abilities have been recharged!
 menhir:common.teleport_safety=Spatial Slip activated! You teleported to safety.
-menhir:common.fire_shield=Your passive ability shields you from fire
-
-# Grove/Nature's Embrace Messages
-menhir.menhir:grove.blessing_success=Grove's Blessing! %d plants have been nourished with bonemeal in a %dx%d radius!
+menhir:the_seer.ebwizardry_required=ElectroBlob's Wizardry mod is required to use this ability.
+menhir:the_seer.invalid_spell=The spell book or scroll contains an invalid spell.
+menhir:the_seer.no_item_mainhand=You must hold a spell book or scroll in your main hand.
+menhir:the_seer.no_wizard_data=Unable to access wizard data. Please try again.
+menhir:the_seer.not_spell_item=The item in your main hand must be a spell book or scroll.
+menhir:the_seer.revelation_success=The Seer's revelation has granted you new magical knowledge!
+menhir:the_seer.spell_already_known=You already know the spell: %s
+menhir:the_seer.spell_discovered=You have discovered the spell: %s
 menhir.menhir:grove.blessing_no_plants=Grove's Blessing activated, but no plants were found to nourish in the area.
+menhir.menhir:grove.blessing_success=Grove's Blessing! %d plants have been nourished with bonemeal in a %dx%d radius!
+
+message.menhir:menhir_already_assigned=You already have a menhir assigned: %s
+message.menhir:random_menhir_assigned=You have been assigned the menhir: %s
+message.menhir:random_menhir_assignment_disabled=Random menhir assignment is disabled in the server configuration.
+
+tile.menhir:menhir_stone.name=Menhir Stone
+
+tooltip.menhir_stone.bound=Bound to: %s
+tooltip.menhir_stone.unbound=Unbound

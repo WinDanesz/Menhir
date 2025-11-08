@@ -53,6 +53,7 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 	public enum EffectType {
 		ATTRIBUTE_MODIFIER("attribute_modifier"),
 		BLAZE_FIREBALL("blaze_fireball"),
+		BLINK("blink"),
 		SPELL_CAST("spell_cast"),
 		POTION_EFFECT("potion_effect"),
 		WIZARDRY_SPELL_MODIFIER("wizardry_spell_modifier"),

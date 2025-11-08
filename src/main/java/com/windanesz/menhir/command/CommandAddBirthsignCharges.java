@@ -1,6 +1,10 @@
 package com.windanesz.menhir.command;
 
+import com.windanesz.menhir.api.IBirthsignData;
+import com.windanesz.menhir.capability.BirthsignDataProvider;
 import com.windanesz.menhir.eventhandler.BirthsignEffectManager;
+import com.windanesz.menhir.network.NetworkHandler;
+import com.windanesz.menhir.network.PacketSyncBirthsignData;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -59,6 +63,17 @@ public class CommandAddBirthsignCharges extends CommandBase {
 			int current = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
 			BirthsignEffectManager.setBirthsignRemainingPassiveCharges(player, current + amount);
 			sender.sendMessage(new TextComponentString("Added " + amount + " passive birthsign charge(s) to " + player.getName() + ". Now has " + (current + amount) + "."));
+		}
+		
+		// Sync updated charges to client
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		if (data != null) {
+			String birthsignName = data.getBirthsign();
+			if (birthsignName != null && !birthsignName.isEmpty()) {
+				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+				data.writeToNBT(nbt);
+				NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), player);
+			}
 		}
 	}
 

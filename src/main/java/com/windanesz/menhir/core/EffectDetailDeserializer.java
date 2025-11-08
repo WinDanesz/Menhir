@@ -22,6 +22,9 @@ public class EffectDetailDeserializer implements JsonDeserializer<Birthsign.Effe
 		if (jsonObject.has("type")) {
 			String typeName = jsonObject.get("type").getAsString();
 			effectDetail.type = Birthsign.EffectType.fromJsonName(typeName);
+			if (effectDetail.type == null) {
+				com.windanesz.menhir.Menhir.logger.error("Unknown ability type '{}' found in birthsign JSON. This ability will be skipped.", typeName);
+			}
 		}
 
 		// Add all other fields to the parameters map

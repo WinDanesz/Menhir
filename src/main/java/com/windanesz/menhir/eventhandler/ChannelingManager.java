@@ -17,12 +17,20 @@ import java.util.UUID;
 public class ChannelingManager {
 	private static final Map<UUID, ChannelingData> activeChanneling = new HashMap<>();
 	private static final Map<UUID, Integer> channelingCooldowns = new HashMap<>();
+	private static final Map<UUID, Boolean> lastExecutionResults = new HashMap<>();
 	private static final int COOLDOWN_TICKS = 40; // 2 seconds cooldown after channeling completes
 
-	public static void startChanneling(EntityPlayer player, IBirthsignActiveAbility ability, int channelingTicks) {
-		UUID playerId = player.getUniqueID();
+	public static void setLastExecutionResult(EntityPlayer player, boolean success) {
+		lastExecutionResults.put(player.getUniqueID(), success);
+	}
+	
+	private static boolean getAndClearLastExecutionResult(EntityPlayer player) {
+		Boolean result = lastExecutionResults.remove(player.getUniqueID());
+		return result != null && result;
+	}
 
-		// Check if player is on cooldown
+	public static void startChanneling(EntityPlayer player, IBirthsignActiveAbility ability, int channelingTicks) {
+		UUID playerId = player.getUniqueID();		// Check if player is on cooldown
 		if (channelingCooldowns.containsKey(playerId)) {
 			int cooldownLeft = channelingCooldowns.get(playerId);
 			if (cooldownLeft > 0) {
@@ -76,6 +84,10 @@ public class ChannelingManager {
 		if (event.phase != TickEvent.Phase.END) return;
 
 		EntityPlayer player = event.player;
+		
+		// Only process channeling on the server side to avoid double-ticking
+		if (player.world.isRemote) return;
+		
 		UUID playerId = player.getUniqueID();
 
 		// Handle cooldowns
@@ -89,15 +101,6 @@ public class ChannelingManager {
 		ChannelingData data = activeChanneling.get(playerId);
 
 		if (data != null) {
-			// Check if player is still holding the key (client-side check)
-			if (player.world.isRemote) {
-				if (!com.windanesz.menhir.client.ClientProxy.KEY_ACTIVATE_POWER.isKeyDown()) {
-					// Key released, stop channeling
-					stopChanneling(player);
-					return;
-				}
-			}
-
 			data.currentTicks++;
 
 			// Show progress every second (20 ticks)
@@ -117,14 +120,34 @@ public class ChannelingManager {
 				// Add cooldown to prevent immediate re-channeling
 				channelingCooldowns.put(playerId, COOLDOWN_TICKS);
 
-				// Send packet to activate birthsign power (server will handle the activation)
-				if (player.world.isRemote) {
-					NetworkHandler.sendToServer(new PacketActivateBirthsignPower());
+				// Execute the ability's channeling completion method
+				data.ability.onChannelingComplete(player);
+				
+				// Check if the ability execution was successful
+				boolean success = getAndClearLastExecutionResult(player);
+				
+				if (success) {
+					// Consume a charge only if the ability succeeded
+					BirthsignEffectManager.decrementBirthsignRemainingCharges(player);
+					
+					// Sync charges to client
+					if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+						com.windanesz.menhir.api.IBirthsignData birthsignData = com.windanesz.menhir.capability.BirthsignDataProvider.get(player);
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						if (birthsignData != null) {
+							birthsignData.writeToNBT(nbt);
+						}
+						String birthsignName = birthsignData != null ? birthsignData.getBirthsign() : "";
+						com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+							new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+							(net.minecraft.entity.player.EntityPlayerMP) player
+						);
+					}
 				}
-
-				player.sendMessage(new TextComponentString(
-						TextFormatting.GREEN + "Channeling complete!"
-				));
+				
+				// player.sendMessage(new TextComponentString(
+				// 		TextFormatting.GREEN + "Channeling complete!"
+				// ));
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,14 +13,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public class AOEPotionEffectAbility implements IBirthsignActiveAbility {
+public class AOEPotionEffectAbility extends ChannelingAbility {
 	private final String potionName;
 	private final int amplifier;
 	private final int duration;
 	private final double radius;
 	private final Set<TargetType> targetTypes;
 
-	public AOEPotionEffectAbility(String potionName, int amplifier, int duration, double radius, Set<TargetType> targetTypes) {
+	public AOEPotionEffectAbility(int chargeup, String potionName, int amplifier, int duration, double radius, Set<TargetType> targetTypes) {
+		super(chargeup);
 		this.potionName = potionName;
 		this.amplifier = amplifier;
 		this.duration = duration;
@@ -29,7 +30,7 @@ public class AOEPotionEffectAbility implements IBirthsignActiveAbility {
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		World world = player.world;
 		Potion potion = Potion.getPotionFromResourceLocation(potionName);
 		if (potion == null) return false;
@@ -41,12 +42,14 @@ public class AOEPotionEffectAbility implements IBirthsignActiveAbility {
 				centerX + radius, centerY + radius, centerZ + radius
 		);
 		List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, aabb);
+		boolean affected = false;
 		for (EntityLivingBase entity : entities) {
 			if (shouldAffect(player, entity)) {
 				entity.addPotionEffect(new PotionEffect(potion, duration, amplifier));
+				affected = true;
 			}
 		}
-		return true;
+		return affected;
 	}
 
 	private boolean shouldAffect(EntityPlayer player, EntityLivingBase entity) {

@@ -1,5 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
+import com.windanesz.menhir.ability.ChannelingAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.util.ParameterUtils;
 import net.minecraft.entity.Entity;
@@ -9,21 +10,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class HealOnKillAbility implements IBirthsignActiveAbility {
+public class HealOnKillAbility extends ChannelingAbility {
 
 	private final double healAmount;
 
-	public HealOnKillAbility(double healAmount) {
+	public HealOnKillAbility(int chargeup, double healAmount) {
+		super(chargeup);
 		this.healAmount = healAmount;
 	}
 
 	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		double amount = ParameterUtils.getDoubleParameter(params, "amount", 0.5);
-		return new HealOnKillAbility(amount);
+		return new HealOnKillAbility(chargeup, amount);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		// This ability is passive and doesn't need activation
 		// It will be handled by the event system
 		return false;

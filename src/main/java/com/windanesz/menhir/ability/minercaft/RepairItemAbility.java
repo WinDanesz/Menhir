@@ -1,6 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
-import com.windanesz.menhir.api.IBirthsignActiveAbility;
+import com.windanesz.menhir.ability.ChannelingAbility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -11,15 +11,17 @@ import net.minecraft.util.text.TextFormatting;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class RepairItemAbility implements IBirthsignActiveAbility {
+public class RepairItemAbility extends ChannelingAbility {
 
 	private final double restorePercent;
 
-	public RepairItemAbility(double restorePercent) {
+	public RepairItemAbility(int chargeup, double restorePercent) {
+		super(chargeup);
 		this.restorePercent = restorePercent;
 	}
 
 	public static RepairItemAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		double restorePercent = 0.25; // Default 25%
 
 		if (params.containsKey("restore_percent")) {
@@ -29,11 +31,11 @@ public class RepairItemAbility implements IBirthsignActiveAbility {
 			}
 		}
 
-		return new RepairItemAbility(restorePercent);
+		return new RepairItemAbility(chargeup, restorePercent);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		ItemStack mainHand = player.getHeldItem(EnumHand.MAIN_HAND);
 		ItemStack offHand = player.getHeldItem(EnumHand.OFF_HAND);
 
@@ -75,12 +77,10 @@ public class RepairItemAbility implements IBirthsignActiveAbility {
 			String itemName = stack.getDisplayName();
 			player.sendMessage(new TextComponentString(TextFormatting.GREEN +
 					"Emberheart Blessing restored " + restoreAmount + " durability to " + itemName + "!"));
-
-			// Return true if durability was actually changed
+			
 			return newDamage != currentDamage;
 		}
-
-		return false; // No durability was restored
+		return false;
 	}
 
 	public double getRestorePercent() {

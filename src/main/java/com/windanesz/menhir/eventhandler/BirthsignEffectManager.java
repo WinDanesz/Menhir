@@ -207,6 +207,10 @@ public class BirthsignEffectManager {
 
 	public static void applyBirthsignActiveEffects(EntityPlayer player, String birthsignName) {
 		if (getBirthsignRemainingCharges(player) <= 0) {
+			// Send message to player that they have no charges remaining
+			player.sendMessage(new net.minecraft.util.text.TextComponentString(
+				net.minecraft.util.text.TextFormatting.RED + "You have no active ability charges remaining!"
+			));
 			return;
 		}
 		boolean decrement = false;
@@ -222,6 +226,19 @@ public class BirthsignEffectManager {
 
 		if (decrement) {
 			decrementBirthsignRemainingCharges(player);
+			
+			// Sync to client with full capability data
+			if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+				IBirthsignData data = BirthsignDataProvider.get(player);
+				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+				if (data != null) {
+					data.writeToNBT(nbt);
+				}
+				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+					(net.minecraft.entity.player.EntityPlayerMP) player
+				);
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
+import com.windanesz.menhir.ability.ChannelingAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.util.ParameterUtils;
 import net.minecraft.entity.Entity;
@@ -12,24 +13,26 @@ import net.minecraft.util.text.TextFormatting;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class GetItemAbility implements IBirthsignActiveAbility {
+public class GetItemAbility extends ChannelingAbility {
 
 	private final String itemId;
 	private final int count;
 
-	public GetItemAbility(String itemId, int count) {
+	public GetItemAbility(int chargeup, String itemId, int count) {
+		super(chargeup);
 		this.itemId = itemId;
 		this.count = count;
 	}
 
 	public static IBirthsignActiveAbility create(Map<String, Object> params, String birthsignName) {
+		int chargeup = getChargeup(params, 0);
 		String item = ParameterUtils.getStringParameter(params, "item", "");
 		int count = ParameterUtils.getIntParameter(params, "count", 1);
-		return new GetItemAbility(item, count);
+		return new GetItemAbility(chargeup, item, count);
 	}
 
 	@Override
-	public boolean activate(EntityPlayer player, @Nullable Entity target) {
+	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
 		if (itemId == null || itemId.isEmpty()) {
 			sendNoItemConfiguredMessage(player);
 			return false;
@@ -46,12 +49,11 @@ public class GetItemAbility implements IBirthsignActiveAbility {
 
 		if (success) {
 			sendItemGivenMessage(player, itemStack);
-			return true;
 		} else {
 			// Drop the item on the ground if inventory is full
 			player.dropItem(itemStack, false);
-			return true;
 		}
+		return true;
 	}
 
 	private void sendNoItemConfiguredMessage(EntityPlayer player) {

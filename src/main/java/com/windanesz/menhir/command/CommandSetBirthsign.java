@@ -5,6 +5,8 @@ import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
 import com.windanesz.menhir.eventhandler.BirthsignEffectManager;
+import com.windanesz.menhir.network.NetworkHandler;
+import com.windanesz.menhir.network.PacketSyncBirthsignData;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -58,6 +60,11 @@ public class CommandSetBirthsign extends CommandBase {
 
 		// Set the new birthsign
 		data.setBirthsign(birthsignName);
+
+		// Sync to client with full capability data
+		net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+		data.writeToNBT(nbt);
+		NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), player);
 
 		// Reapply birthsign effects (this will remove old effects and apply new ones)
 		BirthsignEffectManager.reapplyBirthsignEffects(player, oldBirthsign, birthsignName);
