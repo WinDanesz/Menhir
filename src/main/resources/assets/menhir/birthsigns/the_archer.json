@@ -5,7 +5,15 @@
     "wizardryutils"
   ],
   "active_daily_uses": 1,
-  "passive": [],
+  "passive_daily_uses": 32,
+  "passive": [
+    {
+      "effect": {
+        "type": "arrow_salvage",
+        "chance": 100
+      }
+    }
+  ],
   "active": [
     {
       "effect": {

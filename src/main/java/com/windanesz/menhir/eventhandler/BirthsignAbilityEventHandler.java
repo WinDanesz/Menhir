@@ -12,7 +12,13 @@ import electroblob.wizardry.util.SpellModifiers;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Enchantments;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemBow;
+import net.minecraft.item.ItemStack;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -36,6 +42,77 @@ public class BirthsignAbilityEventHandler {
 			handleFallDamageReduction(event);
 			handleSpatialSlip(event);
 			handleFireImmunity(event);
+		}
+	}
+
+	@SubscribeEvent
+	public static void onArrowImpact(ProjectileImpactEvent.Arrow event) {
+		if (!(event.getArrow().shootingEntity instanceof EntityPlayer) || event.getArrow().world.isRemote) return;
+		EntityPlayer player = (EntityPlayer) event.getArrow().shootingEntity;
+
+		if (event.getRayTraceResult() == null || event.getRayTraceResult().entityHit == null) return;
+
+		String birthsignName = getPlayerBirthsign(player);
+		if (birthsignName == null) return;
+
+		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
+		if (birthsign == null || birthsign.passive == null) return;
+
+		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
+			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.ARROW_SALVAGE) {
+
+				ItemStack mainHand = player.getHeldItemMainhand();
+				ItemStack offHand = player.getHeldItemOffhand();
+				boolean hasInfinityBow = (mainHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, mainHand) > 0) ||
+						(offHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, offHand) > 0);
+
+				if (!hasInfinityBow) {
+					int recoveryChance = effect.effect.getParameter("chance", 100);
+
+					if (player.world.rand.nextInt(100) < recoveryChance) {
+						int maxPassiveCharges = birthsign.passive_daily_uses;
+
+						if (maxPassiveCharges > -1) {
+							int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
+							if (currentPassiveCharges <= 0) {
+								return; // No charges left
+							}
+							BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+							// client sync
+							if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+								IBirthsignData data = BirthsignDataProvider.get(player);
+								if (birthsignName != null) {
+									net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+									if (data != null) {
+										data.writeToNBT(nbt);
+									}
+									com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+											new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt),
+											(net.minecraft.entity.player.EntityPlayerMP) player
+									);
+								}
+							}
+						}
+
+						ItemStack arrowStack;
+						try {
+							java.lang.reflect.Method getArrowStackMethod = EntityArrow.class.getDeclaredMethod("getArrowStack");
+							getArrowStackMethod.setAccessible(true);
+							arrowStack = (ItemStack) getArrowStackMethod.invoke(event.getArrow());
+						} catch (Exception e) {
+							arrowStack = new ItemStack(net.minecraft.init.Items.ARROW);
+							Menhir.logger.warn("Could not get arrow itemstack via reflection", e);
+						}
+
+						if (!player.inventory.addItemStackToInventory(arrowStack.copy())) {
+							player.dropItem(arrowStack.copy(), false);
+						}
+
+						event.getArrow().setDead();
+					}
+				}
+				break;
+			}
 		}
 	}
 
@@ -381,8 +458,7 @@ public class BirthsignAbilityEventHandler {
 	}
 
 	/**
-	 * Handles heal on kill passive ability
-	 * When a player kills an entity, they heal based on their max health
+	 * Handles heal on kill
 	 */
 	@SubscribeEvent
 	public static void onEntityDeath(LivingDeathEvent event) {
@@ -397,11 +473,12 @@ public class BirthsignAbilityEventHandler {
 				Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
 				if (birthsign != null && birthsign.passive != null) {
 					for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-						if (effect.effect != null && effect.effect.type == Birthsign.EffectType.HEAL_ON_KILL) {
+						if (effect.effect == null) continue;
+
+						if (effect.effect.type == Birthsign.EffectType.HEAL_ON_KILL) {
 							// Create the HealOnKillAbility from the effect parameters
 							HealOnKillAbility healAbility = (HealOnKillAbility) HealOnKillAbility.create(effect.effect.parameters, birthsignName);
 							healAbility.onKill(player, event.getEntityLiving());
-							break;
 						}
 					}
 				}
