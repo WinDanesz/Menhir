@@ -13,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
@@ -69,13 +70,12 @@ public class BirthsignCoreEventHandler {
 							birthsignNameForTranslation = randomBirthsign.split(":")[1];
 						}
 
-						// Get the localized birthsign name
-						String localizedBirthsignName = Menhir.proxy.translate("birthsign." + birthsignNameForTranslation + ".name");
+						// Create the message component with client-side translation
+						TextComponentString message = new TextComponentString("You have been assigned the birthsign: ");
+						message.getStyle().setColor(TextFormatting.GOLD);
+						message.appendSibling(new TextComponentTranslation("birthsign." + birthsignNameForTranslation + ".name"));
 
-						player.sendMessage(new TextComponentString(
-								TextFormatting.GOLD +
-										String.format("You have been assigned the birthsign: %s", localizedBirthsignName)
-						));
+						player.sendMessage(message);
 					}
 
 					if (Menhir.logger != null) {
