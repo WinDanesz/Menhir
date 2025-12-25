@@ -46,11 +46,8 @@ public class BirthsignEffectManager {
 				String attribute = eff.getParameter("attribute", "");
 				double amount = eff.getParameter("amount", 0.0);
 				int operation = getOperation(String.valueOf(eff.getParameter("operation", 0)));
-				String attributeClass = eff.getParameter("attribute_class", "");
-				String attributeField = eff.getParameter("attribute_field", "");
-
-				BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, attributeClass, attributeField, amount, operation, birthsign.name);
-				mod.apply(player, birthsign.name);
+				   BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, birthsign.name);
+				   mod.apply(player, birthsign.name);
 			} else if (eff.type == Birthsign.EffectType.FALL_DAMAGE_REDUCTION) {
 				// Fall damage reduction effects are handled by the event handler
 				// This just marks that the player has this ability
@@ -259,11 +256,8 @@ public class BirthsignEffectManager {
 				String attribute = eff.getParameter("attribute", "");
 				double amount = eff.getParameter("amount", 0.0);
 				int operation = getOperation(String.valueOf(eff.getParameter("operation", 0)));
-				String attributeClass = eff.getParameter("attribute_class", "");
-				String attributeField = eff.getParameter("attribute_field", "");
-
-				BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, attributeClass, attributeField, amount, operation, birthsignFromString.name);
-				mod.remove(player, birthsignFromString.name);
+				   BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, birthsignFromString.name);
+				   mod.remove(player, birthsignFromString.name);
 			}
 		}
 	}

@@ -14,17 +14,13 @@ public class AttributeModifierAbility extends ChannelingAbility {
 	private final String attribute;
 	private final double amount;
 	private final int operation;
-	private final String attributeClass;
-	private final String attributeField;
 	private final String birthsignName;
 
-	public AttributeModifierAbility(int chargeup, String attribute, double amount, int operation, String attributeClass, String attributeField, String birthsignName) {
+	public AttributeModifierAbility(int chargeup, String attribute, double amount, int operation, String birthsignName) {
 		super(chargeup);
 		this.attribute = attribute;
 		this.amount = amount;
 		this.operation = operation;
-		this.attributeClass = attributeClass;
-		this.attributeField = attributeField;
 		this.birthsignName = birthsignName;
 	}
 
@@ -33,14 +29,12 @@ public class AttributeModifierAbility extends ChannelingAbility {
 		String attribute = ParameterUtils.getStringParameter(params, "attribute", "");
 		double amount = ParameterUtils.getDoubleParameter(params, "amount", 0.0);
 		int operation = ParameterUtils.getIntParameter(params, "operation", 0);
-		String attributeClass = ParameterUtils.getStringParameter(params, "attributeClass", null);
-		String attributeField = ParameterUtils.getStringParameter(params, "attributeField", null);
-		return new AttributeModifierAbility(chargeup, attribute, amount, operation, attributeClass, attributeField, birthsignName);
+		return new AttributeModifierAbility(chargeup, attribute, amount, operation, birthsignName);
 	}
 
 	@Override
 	protected boolean executeAbility(EntityPlayer player, @Nullable Entity target) {
-		BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, attributeClass, attributeField, amount, operation, birthsignName);
+		BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, birthsignName);
 		mod.apply(player, birthsignName);
 		return true;
 	}
