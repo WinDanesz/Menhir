@@ -1,0 +1,27 @@
+# Example Custom Language File for Menhir
+# Rename this file to "menhir.lang" to use it
+# Place it in config/menhir/lang/ to customize translations
+
+# ========================================
+# Example: Custom Birthsign - The Paladin
+# ========================================
+# These translations are for a custom birthsign you might create
+# birthsign.the_paladin.name=The Paladin
+# birthsign.the_paladin.desc=A holy warrior blessed by divine powers
+# birthsign.the_paladin.lore=The Paladin constellation shines brightest in times of need
+# birthsign.the_paladin.passive=Passively grants increased attack damage and armor
+# birthsign.the_paladin.active=Once per day, calls upon divine might for strength and resilience
+
+# ========================================
+# Example: Overriding Existing Birthsigns
+# ========================================
+# Uncomment any of these lines to override default translations
+# birthsign.the_warrior.name=The Champion
+# birthsign.the_mage.name=The Archmage
+# birthsign.the_thief.name=The Shadow
+
+# ========================================
+# Example: Custom Messages
+# ========================================
+# You can also override any game messages
+# message.menhir:birthsign_assigned=You have been granted the power of: %s
