@@ -1,7 +1,10 @@
 package com.windanesz.menhir;
 
+import com.windanesz.menhir.network.PacketOpenBirthsignSelectionGUI;
+import com.windanesz.menhir.network.PacketSyncBirthsignData;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.List;
 
@@ -31,6 +34,14 @@ public class CommonProxy {
 	}
 
 	public void initialiseAnimations() {
+	}
+
+	public void handleSyncBirthsignData(PacketSyncBirthsignData message, MessageContext ctx) {
+		// Does nothing on server
+	}
+
+	public void handleOpenBirthsignSelectionGUI(PacketOpenBirthsignSelectionGUI message, MessageContext ctx) {
+		// Does nothing on server
 	}
 
 	/**

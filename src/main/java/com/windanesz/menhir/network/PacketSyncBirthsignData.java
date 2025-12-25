@@ -1,10 +1,7 @@
 package com.windanesz.menhir.network;
 
-import com.windanesz.menhir.api.IBirthsignData;
-import com.windanesz.menhir.capability.BirthsignDataProvider;
+import com.windanesz.menhir.Menhir;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,8 +9,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketSyncBirthsignData implements IMessage {
-	private String birthsign;
-	private NBTTagCompound additionalData;
+	public String birthsign;
+	public NBTTagCompound additionalData;
 
 	public PacketSyncBirthsignData() {
 	}
@@ -46,21 +43,7 @@ public class PacketSyncBirthsignData implements IMessage {
 	public static class Handler implements IMessageHandler<PacketSyncBirthsignData, IMessage> {
 		@Override
 		public IMessage onMessage(PacketSyncBirthsignData message, MessageContext ctx) {
-			Minecraft.getMinecraft().addScheduledTask(() -> {
-				EntityPlayer player = Minecraft.getMinecraft().player;
-				if (player != null) {
-					IBirthsignData data = BirthsignDataProvider.get(player);
-					if (data != null) {
-						// Read all data (including birthsign name) from NBT
-						if (message.additionalData != null && !message.additionalData.isEmpty()) {
-							data.readFromNBT(message.additionalData);
-						} else {
-							// Fallback if NBT is empty - just set the birthsign name
-							data.setBirthsign(message.birthsign);
-						}
-					}
-				}
-			});
+			Menhir.proxy.handleSyncBirthsignData(message, ctx);
 			return null;
 		}
 	}
