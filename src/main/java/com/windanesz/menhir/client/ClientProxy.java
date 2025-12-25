@@ -2,18 +2,26 @@ package com.windanesz.menhir.client;
 
 import com.windanesz.menhir.CommonProxy;
 import com.windanesz.menhir.Menhir;
+import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.block.BlockMenhirStone;
+import com.windanesz.menhir.capability.BirthsignDataProvider;
+import com.windanesz.menhir.client.renderer.tileentity.RenderTileEntityAltar;
 import com.windanesz.menhir.integration.antiqueatlas.MenhirAntiqueAtlasIntegration;
+import com.windanesz.menhir.network.PacketOpenBirthsignSelectionGUI;
+import com.windanesz.menhir.network.PacketSyncBirthsignData;
+import com.windanesz.menhir.tileentity.TileEntityAltar;
 import com.windanesz.menhir.tileentity.TileEntityMenhirStone;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.Style;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
@@ -28,22 +36,55 @@ public class ClientProxy extends CommonProxy {
 	public void init() {
 		registerKeybindings();
 		MinecraftForge.EVENT_BUS.register(this);
+		MinecraftForge.EVENT_BUS.register(new com.windanesz.menhir.client.gui.GuiEvents());
 		
 		// Load custom language files from config/menhir/lang/
 		CustomLangLoader.loadCustomLangFiles();
 	}
 
+	@Override
+	public void handleSyncBirthsignData(PacketSyncBirthsignData message, MessageContext ctx) {
+		Minecraft.getMinecraft().addScheduledTask(() -> {
+			EntityPlayer player = Minecraft.getMinecraft().player;
+			if (player != null) {
+				IBirthsignData data = BirthsignDataProvider.get(player);
+				if (data != null) {
+					// Read all data (including birthsign name) from NBT
+					if (message.additionalData != null && !message.additionalData.isEmpty()) {
+						data.readFromNBT(message.additionalData);
+					} else {
+						// Fallback if NBT is empty - just set the birthsign name
+						data.setBirthsign(message.birthsign);
+					}
+				}
+			}
+		});
+	}
+
+	@Override
+	public void handleOpenBirthsignSelectionGUI(PacketOpenBirthsignSelectionGUI message, MessageContext ctx) {
+		Minecraft.getMinecraft().addScheduledTask(() -> {
+			EntityPlayer player = Minecraft.getMinecraft().player;
+			if (player != null) {
+				openBirthsignSelectionGUI(player);
+			}
+		});
+	}
+	
 	private void registerKeybindings() {
-		KEY_ACTIVATE_POWER = new KeyBinding("key.menhir:trigger_ability", Keyboard.KEY_K, "key.menhir.category");
+		KEY_ACTIVATE_POWER = new KeyBinding("key.menhir.trigger_ability", Keyboard.KEY_K, "key.menhir.category");
 		ClientRegistry.registerKeyBinding(KEY_ACTIVATE_POWER);
 		
-		KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir:show_birthsign", Keyboard.KEY_B, "key.menhir.category");
+		KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir.show_birthsign", Keyboard.KEY_B, "key.menhir.category");
 		ClientRegistry.registerKeyBinding(KEY_SHOW_BIRTHSIGN);
 	}
+
 
 	public void registerRenderers() {
 		// Register custom renderer for birthsign stone blocks
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMenhirStone.class, new MenhirStoneRenderer());
+		// Register custom renderer for altar blocks
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAltar.class, new RenderTileEntityAltar());
 	}
 
 	@Override

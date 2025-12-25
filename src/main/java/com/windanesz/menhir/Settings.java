@@ -14,6 +14,10 @@ public class Settings {
 	@Config.LangKey("settings.menhir:general_settings")
 	public static GeneralSettings generalSettings = new GeneralSettings();
 
+	@Config.Name("Client Settings")
+	@Config.LangKey("settings.menhir:client_settings")
+	public static ClientSettings clientSettings = new ClientSettings();
+
 	@SuppressWarnings("unused")
 	@Mod.EventBusSubscriber(modid = Menhir.MODID)
 	private static class EventHandler {
@@ -74,5 +78,19 @@ public class Settings {
 		@Config.Comment("List of birthsigns to disable from registering. Use the format 'menhir:birthsign_name' (e.g., 'menhir:the_blaze'). Leave empty to enable all birthsigns.")
 		public String[] disabled_birthsigns = {};
 
+	}
+
+	public static class ClientSettings {
+		@Config.Name("Show Inventory Button")
+		@Config.Comment("If true, a button to open the Birthsign GUI will be displayed in the player inventory.")
+		public boolean show_inventory_button = true;
+
+		@Config.Name("Inventory Button X Offset")
+		@Config.Comment("The X offset of the birthsign button relative to the inventory GUI's top-left corner.")
+		public int inventory_button_x_offset = 64;
+
+		@Config.Name("Inventory Button Y Offset")
+		@Config.Comment("The Y offset of the birthsign button relative to the inventory GUI's top-left corner.")
+		public int inventory_button_y_offset = 65;
 	}
 }

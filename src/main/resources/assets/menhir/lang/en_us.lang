@@ -113,8 +113,8 @@ gui.menhir.birthsign.unknown_effect=Unknown Effect
 
 item.menhir:menhir_stone.name=Menhir Stone
 key.menhir.category=Menhir
-key.menhir:show_birthsign=Show Birthsign
-key.menhir:trigger_ability=Toggle Ability
+key.menhir.show_birthsign=Show Birthsign
+key.menhir.trigger_ability=Toggle Ability
 menhir:common.ability_recharged=Your menhir active abilities have been recharged!
 menhir:common.fire_shield=Your passive ability shields you from fire
 menhir:common.passive_recharged=Your menhir passive abilities have been recharged!
@@ -138,3 +138,4 @@ tile.menhir:menhir_stone.name=Menhir Stone
 
 tooltip.menhir_stone.bound=Bound to: %s
 tooltip.menhir_stone.unbound=Unbound
+menhir.tooltip.birthsigns=Birthsigns
