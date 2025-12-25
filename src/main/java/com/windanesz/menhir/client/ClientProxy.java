@@ -34,10 +34,10 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	private void registerKeybindings() {
-		KEY_ACTIVATE_POWER = new KeyBinding("key.menhir.charm_bauble_activate", Keyboard.KEY_K, "key.menhir.category");
+		KEY_ACTIVATE_POWER = new KeyBinding("key.menhir:trigger_ability", Keyboard.KEY_K, "key.menhir.category");
 		ClientRegistry.registerKeyBinding(KEY_ACTIVATE_POWER);
 		
-		KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir.show_birthsign", Keyboard.KEY_B, "key.menhir.category");
+		KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir:show_birthsign", Keyboard.KEY_B, "key.menhir.category");
 		ClientRegistry.registerKeyBinding(KEY_SHOW_BIRTHSIGN);
 	}
 

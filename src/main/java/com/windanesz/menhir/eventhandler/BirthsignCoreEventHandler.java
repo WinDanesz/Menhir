@@ -336,13 +336,10 @@ public class BirthsignCoreEventHandler {
 						// Reapply attribute modifiers to ensure they're always present
 						String attribute = eff.getParameter("attribute", "");
 						double amount = eff.getParameter("amount", 0.0);
-						// Handle both Integer and Long types from JSON
 						Object operationObj = eff.getParameter("operation", 0);
 						int operation = getOperation(String.valueOf(operationObj));
-						String attributeClass = eff.getParameter("attribute_class", "");
-						String attributeField = eff.getParameter("attribute_field", "");
 
-						BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, attributeClass, attributeField, amount, operation, birthsign.name);
+						BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, birthsign.name);
 						mod.apply(player, birthsign.name);
 					} else if (eff.type == Birthsign.EffectType.UNDERGROUND_HASTE) {
 						// Apply underground haste effect if conditions are met

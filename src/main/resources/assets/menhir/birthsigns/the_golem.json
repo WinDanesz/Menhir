@@ -5,7 +5,7 @@
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "max_health",
+        "attribute": "generic.maxHealth",
         "amount": 0.15,
         "operation": 1
       }
@@ -13,7 +13,7 @@
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "movement_speed",
+        "attribute": "generic.movementSpeed",
         "amount": -0.05,
         "operation": 1
       }

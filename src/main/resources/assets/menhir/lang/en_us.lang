@@ -1,5 +1,5 @@
 birthsign.the_archer.name=The Archer
-birthsign.the_archer.passive=-
+birthsign.the_archer.passive=Arrow Salvage: Instantly recover arrows that hit a creature.
 birthsign.the_archer.desc=Those born under the sign of The Archer are expert marksmen with unparalleled precision.
 birthsign.the_archer.lore=The Archer constellation guides arrows true and steady to their mark.
 birthsign.the_archer.active=Conjure a spirit bow that lasts 60 seconds
@@ -22,7 +22,7 @@ birthsign.the_charmer.name=The Charmer
 birthsign.the_charmer.passive=-
 birthsign.the_charmer.active=Charm: Nearby villages treat you with a boon
 
-birthsign.the_conjuration.active=Arcane Echo: Once per day, if no spell is yet bound, you may bind the held spell book as your Arcane Echo spell. This consumes your use for the day. Future activations will cast the bound spell for free, without consuming mana or the scroll.
+birthsign.the_conjuration.active=Arcane Echo: Once per day, if no spell is yet bound, you may bind the held spell book as your Arcane Echo spell while sneaking. This consumes your use for the day. Future activations will cast the bound spell for free, without consuming mana.
 birthsign.the_conjuration.desc=Those born under the sign of The Conjuration excel at summoning and commanding otherworldly forces.
 birthsign.the_conjuration.lore=The Conjuration constellation binds the paths between realms.
 birthsign.the_conjuration.name=The Conjuration
@@ -113,8 +113,8 @@ gui.menhir.birthsign.unknown_effect=Unknown Effect
 
 item.menhir:menhir_stone.name=Menhir Stone
 key.menhir.category=Menhir
-key.menhir.show_birthsign=Show Birthsign
-
+key.menhir:show_birthsign=Show Birthsign
+key.menhir:trigger_ability=Toggle Ability
 menhir:common.ability_recharged=Your menhir active abilities have been recharged!
 menhir:common.fire_shield=Your passive ability shields you from fire
 menhir:common.passive_recharged=Your menhir passive abilities have been recharged!

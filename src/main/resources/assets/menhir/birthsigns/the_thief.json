@@ -5,7 +5,7 @@
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "movement_speed",
+        "attribute": "generic.movementSpeed",
         "amount": 0.03,
         "operation": 1
       }

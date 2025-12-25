@@ -5,7 +5,7 @@
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "attack_damage",
+        "attribute": "generic.attackDamage",
         "amount": 0.10,
         "operation": 1
       }
@@ -13,7 +13,7 @@
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "armor",
+        "attribute": "generic.armor",
         "amount": 2.0,
         "operation": 0
       }

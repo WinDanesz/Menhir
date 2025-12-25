@@ -74,7 +74,8 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 		GIVE_ITEM("give_item"),
 		BLOCK_PLACEMENT("block_placement"),
 		HEAL_ON_KILL("heal_on_kill"),
-		COMMAND_ABILITY("command_ability");
+		COMMAND_ABILITY("command_ability"),
+		ARROW_SALVAGE("arrow_salvage");
 
 		private final String jsonName;
 
@@ -124,6 +125,19 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 		public <T> T getParameter(String key, T defaultValue) {
 			Object value = parameters.get(key);
 			if (value != null) {
+				// Handle numeric conversions for Double/Float
+				if (defaultValue instanceof Double && value instanceof Number) {
+					return (T) (Double) ((Number) value).doubleValue();
+				}
+				if (defaultValue instanceof Float && value instanceof Number) {
+					return (T) (Float) ((Number) value).floatValue();
+				}
+				if (defaultValue instanceof Integer && value instanceof Number) {
+					return (T) (Integer) ((Number) value).intValue();
+				}
+				if (defaultValue instanceof Long && value instanceof Number) {
+					return (T) (Long) ((Number) value).longValue();
+				}
 				return (T) value;
 			}
 			return defaultValue;
