@@ -1,0 +1,50 @@
+{
+  "id": "altar_of_shadows",
+  "name": "Altar of Shadows",
+  "rarity": "rare",
+  "in_tier_weight": 1.0,
+  "obfuscated": true,
+  "usage": {
+    "type": "times_per_player",
+    "limit": 1
+  },
+  "channel_time": 100,
+  "guardians": [
+    {
+      "entity": "minecraft:skeleton",
+      "min_count": 3,
+      "max_count": 5,
+      "spawn_type": "first_interaction",
+      "spawn_chance": 1.0
+    }
+  ],
+  "effects": [
+    {
+      "type": "potion",
+      "id": "invisibility_effect",
+      "potion": "minecraft:invisibility",
+      "duration": 6000,
+      "amplifier": 0,
+      "once_per_player": true
+    },
+    {
+      "type": "potion",
+      "id": "night_vision_effect",
+      "potion": "minecraft:night_vision",
+      "duration": 6000,
+      "amplifier": 0
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:ender_pearl",
+        "min_count": 4,
+        "consumed": true
+      }
+    ],
+    "xp_levels": 10,
+    "consume_xp": true
+  },
+  "allowed_times_of_day": ["night", "midnight"]
+}

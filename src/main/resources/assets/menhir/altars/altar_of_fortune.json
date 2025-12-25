@@ -1,0 +1,52 @@
+{
+  "id": "altar_of_fortune",
+  "name": "Altar of Fortune",
+  "rarity": "epic",
+  "in_tier_weight": 1.0,
+  "unique_per_world": true,
+  "obfuscated": true,
+  "usage": {
+    "type": "times_by_anyone",
+    "limit": 10
+  },
+  "channel_time": 200,
+  "guardians": [
+    {
+      "entity": "minecraft:witch",
+      "min_count": 1,
+      "max_count": 2,
+      "spawn_type": "first_interaction",
+      "spawn_chance": 0.7
+    }
+  ],
+  "effects": [
+    {
+      "type": "potion",
+      "id": "luck_effect",
+      "potion": "minecraft:luck",
+      "duration": 12000,
+      "amplifier": 2
+    },
+    {
+      "type": "command",
+      "id": "give_diamonds",
+      "command": "/give {player} minecraft:diamond 5"
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "min_count": 16,
+        "consumed": true
+      },
+      {
+        "item": "minecraft:gold_ingot",
+        "min_count": 32,
+        "consumed": true
+      }
+    ],
+    "xp_levels": 20,
+    "consume_xp": true
+  }
+}

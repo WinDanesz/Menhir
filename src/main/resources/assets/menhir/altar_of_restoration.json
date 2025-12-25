@@ -1,0 +1,36 @@
+{
+  "id": "altar_of_restoration",
+  "name": "Altar of Restoration",
+  "rarity": "common",
+  "in_tier_weight": 1.0,
+  "usage": {
+    "type": "times_per_player",
+    "limit": 5
+  },
+  "channel_time": 0,
+  "effects": [
+    {
+      "type": "potion",
+      "id": "regeneration_effect",
+      "potion": "minecraft:regeneration",
+      "duration": 600,
+      "amplifier": 1
+    },
+    {
+      "type": "potion",
+      "id": "saturation_effect",
+      "potion": "minecraft:saturation",
+      "duration": 100,
+      "amplifier": 0
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:bread",
+        "min_count": 3,
+        "consumed": true
+      }
+    ]
+  }
+}

@@ -2,6 +2,7 @@ package com.windanesz.menhir.core;
 
 import com.windanesz.menhir.Menhir;
 import com.windanesz.menhir.api.Birthsign;
+import com.windanesz.menhir.block.BlockAltar;
 import com.windanesz.menhir.block.BlockMenhirStone;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -16,6 +17,7 @@ import java.util.List;
 public final class BirthsignRegistrationHandler {
 
 	public static final Block MENHIR_STONE = new BlockMenhirStone().setRegistryName("menhir:menhir_stone");
+	public static final Block ALTAR = new BlockAltar().setRegistryName("menhir:altar");
 
 	@SubscribeEvent
 	public static void registerBirthsigns(RegistryEvent.Register<Birthsign> event) {
@@ -35,6 +37,7 @@ public final class BirthsignRegistrationHandler {
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event) {
 		event.getRegistry().register(MENHIR_STONE);
+		event.getRegistry().register(ALTAR);
 	}
 
 	@SubscribeEvent

@@ -1,0 +1,85 @@
+{
+  "id": "altar_of_the_warrior",
+  "name": "Altar of the Warrior",
+  "rarity": "uncommon",
+  "in_tier_weight": 1.0,
+  "unique_per_world": false,
+  "obfuscated": false,
+  "exclude_from_chaotic": false,
+  "channel_time": 40,
+  "usage": {
+    "type": "times_per_player",
+    "limit": 1
+  },
+  "allowed_times_of_day": [],
+  "required_birthsign": "",
+  "required_mods": [],
+  "global_guardian_chance": 0.3,
+  "guardians": [
+    {
+      "entity_id": "minecraft:zombie",
+      "spawn_type": "first_interaction",
+      "min_count": 3,
+      "max_count": 5,
+      "spawn_chance": 1.0,
+      "entity_nbt": null
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:iron_sword",
+        "metadata": 0,
+        "min_count": 1,
+        "consumed": true,
+        "required_nbt": null
+      }
+    ],
+    "required_xp_levels": 0,
+    "required_xp_amount": 0,
+    "consume_xp": false,
+    "required_advancements": []
+  },
+  "effects": [
+    {
+      "type": "temporary_item",
+      "item": "minecraft:diamond_sword",
+      "metadata": 0,
+      "count": 1,
+      "duration_ticks": 12000,
+      "remove_on_logout": true,
+      "nbt": {
+        "display": {
+          "Name": "§6Warrior's Blade",
+          "Lore": [
+            "§7A legendary sword",
+            "§7blessed by the ancients",
+            "§c§oTemporary"
+          ]
+        },
+        "Enchantments": [
+          {
+            "id": "minecraft:sharpness",
+            "lvl": 5
+          },
+          {
+            "id": "minecraft:unbreaking",
+            "lvl": 3
+          }
+        ]
+      }
+    },
+    {
+      "type": "potion",
+      "potion": "minecraft:strength",
+      "duration": 12000,
+      "amplifier": 1
+    },
+    {
+      "type": "potion",
+      "potion": "minecraft:resistance",
+      "duration": 12000,
+      "amplifier": 0
+    }
+  ]
+}

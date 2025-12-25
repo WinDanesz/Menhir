@@ -1,0 +1,46 @@
+{
+  "id": "altar_of_the_warrior",
+  "name": "Altar of the Warrior",
+  "rarity": "uncommon",
+  "in_tier_weight": 1.0,
+  "usage": {
+    "type": "times_per_player",
+    "limit": 3
+  },
+  "channel_time": 40,
+  "guardians": [
+    {
+      "entity": "minecraft:zombie",
+      "min_count": 2,
+      "max_count": 4,
+      "spawn_type": "first_interaction",
+      "spawn_chance": 0.8
+    }
+  ],
+  "effects": [
+    {
+      "type": "potion",
+      "id": "strength_effect",
+      "potion": "minecraft:strength",
+      "duration": 3600,
+      "amplifier": 1
+    },
+    {
+      "type": "potion",
+      "id": "resistance_effect",
+      "potion": "minecraft:resistance",
+      "duration": 3600,
+      "amplifier": 0
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:iron_sword",
+        "min_count": 1,
+        "consumed": false
+      }
+    ]
+  },
+  "allowed_times_of_day": ["day", "noon"]
+}

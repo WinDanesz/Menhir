@@ -6,8 +6,11 @@ import com.windanesz.menhir.command.CommandAddBirthsignCharges;
 import com.windanesz.menhir.command.CommandGetBirthsign;
 import com.windanesz.menhir.command.CommandPlaceMenhirStone;
 import com.windanesz.menhir.command.CommandSetBirthsign;
+import com.windanesz.menhir.core.AltarRegistry;
 import com.windanesz.menhir.integration.antiqueatlas.MenhirAntiqueAtlasIntegration;
+import com.windanesz.menhir.tileentity.TileEntityAltar;
 import com.windanesz.menhir.tileentity.TileEntityMenhirStone;
+import com.windanesz.menhir.worldgen.AltarWorldGenerator;
 import com.windanesz.menhir.worldgen.WorldGenMenhirStone;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -54,6 +57,18 @@ public class Menhir {
 
 		// Register tile entities
 		net.minecraft.tileentity.TileEntity.register("menhir_stone", TileEntityMenhirStone.class);
+		net.minecraft.tileentity.TileEntity.register("menhir_altar", TileEntityAltar.class);
+
+		// Register altar effect handlers
+		com.windanesz.menhir.core.AltarEffectHandlerRegistry.registerHandler(new com.windanesz.menhir.altar.handler.TeleportTwinHandler());
+		com.windanesz.menhir.core.AltarEffectHandlerRegistry.registerHandler(new com.windanesz.menhir.altar.handler.PrayerHandler());
+		com.windanesz.menhir.core.AltarEffectHandlerRegistry.registerHandler(new com.windanesz.menhir.altar.handler.TeleportRecallHandler());
+		com.windanesz.menhir.core.AltarEffectHandlerRegistry.registerHandler(new com.windanesz.menhir.altar.handler.TemporaryItemHandler());
+		logger.info("Registered altar effect handlers");
+
+		// Load altar definitions from config
+		AltarRegistry.loadAltarDefinitions(event.getModConfigurationDirectory());
+		logger.info("Loaded altar definitions");
 
 		proxy.registerRenderers();
 	}
@@ -63,6 +78,7 @@ public class Menhir {
 
 		MinecraftForge.EVENT_BUS.register(instance); // Since there's already an instance we might as well use it
 		MinecraftForge.EVENT_BUS.register(new com.windanesz.menhir.eventhandler.ChannelingManager());
+		MinecraftForge.EVENT_BUS.register(new com.windanesz.menhir.event.GuardianTracker());
 		// Network must be registered on both sides
 		com.windanesz.menhir.network.NetworkHandler.registerMessages();
 		proxy.registerParticles();
@@ -73,6 +89,11 @@ public class Menhir {
 
 		// Register world generation for menhir stones
 		GameRegistry.registerWorldGenerator(new WorldGenMenhirStone(), 100); // Priority 100 (medium priority)
+		logger.info("Registered menhir stone world generation");
+
+		// Register world generation for altars
+		GameRegistry.registerWorldGenerator(new AltarWorldGenerator(), 101); // Priority 101 (slightly after menhir stones)
+		logger.info("Registered altar world generation");
 	}
 
 	@EventHandler

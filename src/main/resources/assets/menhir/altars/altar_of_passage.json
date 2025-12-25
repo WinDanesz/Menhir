@@ -1,0 +1,26 @@
+{
+  "id": "altar_of_passage",
+  "name": "Altar of Passage",
+  "rarity": "rare",
+  "in_tier_weight": 0.5,
+  "usage": {
+    "type": "unlimited"
+  },
+  "channel_time": 60,
+  "effects": [
+    {
+      "type": "teleport_twin",
+      "id": "twin_teleport",
+      "twin_id": "altar_of_passage_twin"
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:ender_pearl",
+        "min_count": 1,
+        "consumed": true
+      }
+    ]
+  }
+}

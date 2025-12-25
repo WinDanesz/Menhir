@@ -1,0 +1,88 @@
+{
+  "id": "altar_of_ascension",
+  "name": "Altar of Ascension",
+  "rarity": "legendary",
+  "in_tier_weight": 1.0,
+  "unique_per_world": true,
+  "obfuscated": true,
+  "usage": {
+    "type": "times_per_player",
+    "limit": 1
+  },
+  "channel_time": 400,
+  "exclude_from_chaotic": true,
+  "guardians": [
+    {
+      "entity": "minecraft:wither_skeleton",
+      "min_count": 5,
+      "max_count": 8,
+      "spawn_type": "first_interaction",
+      "spawn_chance": 1.0
+    },
+    {
+      "entity": "minecraft:blaze",
+      "min_count": 2,
+      "max_count": 3,
+      "spawn_type": "first_interaction",
+      "spawn_chance": 1.0
+    }
+  ],
+  "effects": [
+    {
+      "type": "potion",
+      "id": "absorption_effect",
+      "potion": "minecraft:absorption",
+      "duration": 24000,
+      "amplifier": 4,
+      "once_per_player": true
+    },
+    {
+      "type": "potion",
+      "id": "resistance_effect",
+      "potion": "minecraft:resistance",
+      "duration": 24000,
+      "amplifier": 2,
+      "once_per_player": true
+    },
+    {
+      "type": "potion",
+      "id": "regeneration_effect",
+      "potion": "minecraft:regeneration",
+      "duration": 24000,
+      "amplifier": 2,
+      "once_per_player": true
+    },
+    {
+      "type": "command",
+      "id": "give_elytra",
+      "command": "/give {player} minecraft:elytra 1"
+    },
+    {
+      "type": "teleport_recall",
+      "id": "recall_point",
+      "max_uses": 3
+    }
+  ],
+  "requirements": {
+    "items": [
+      {
+        "item": "minecraft:nether_star",
+        "min_count": 1,
+        "consumed": true
+      },
+      {
+        "item": "minecraft:diamond",
+        "min_count": 64,
+        "consumed": true
+      },
+      {
+        "item": "minecraft:ender_pearl",
+        "min_count": 16,
+        "consumed": true
+      }
+    ],
+    "xp_levels": 50,
+    "consume_xp": true
+  },
+  "allowed_times_of_day": ["midnight"]
+}
