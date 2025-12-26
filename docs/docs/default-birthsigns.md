@@ -40,7 +40,7 @@ This document lists all the default birthsigns available in Menhir.
 **Lore:** The Blaze constellation burns eternal, a symbol of passionate fury.
 
 **Passive Abilities:**
-- **Embercloak:** Gain temporary fire resistance (5 minutes) upon taking fire damage. (3 uses/day)
+- **Embercloak:** Gain temporary fire resistance upon taking fire damage. (15 seconds, 3 uses/day)
 
 **Active Abilities:**
 - **Flame Strike:** Shoot a powerful fireball. (7 uses/day)
@@ -53,7 +53,7 @@ This document lists all the default birthsigns available in Menhir.
 **Lore:** The Charmer constellation represents the power of words and influence.
 
 **Passive Abilities:**
-- None
+- **Lucky Charm:** You are luckier (+0.5 Luck attribute).
 
 **Active Abilities:**
 - **Charm:** Nearby villages treat you with a boon (Hero of the Village effect). (1 use/day)
@@ -150,10 +150,10 @@ This document lists all the default birthsigns available in Menhir.
 **Lore:** The Lodestone constellation draws power from the deep earth.
 
 **Passive Abilities:**
-- None
+- **Earth Anchor:** You are steadfast and resistant to knockback (50% Knockback Resistance).
 
 **Active Abilities:**
-- **Starbound:** After a short channel, teleport to your spawn point. (1 use/day)
+- **Waystone:** Sneak+Cast to Mark your current location (Free). Cast normally to Recall/Teleport to the marked location (Costs Charge). Max Range: 500 blocks. (2 uses/day)
 
 ---
 

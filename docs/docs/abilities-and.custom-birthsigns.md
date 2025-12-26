@@ -46,7 +46,7 @@ Applies a potion effect to entities in an area around the player.
 
 Applies a permanent attribute modifier to the player.
 
--   `attribute`: (String) The name of the attribute to modify (e.g., `minecraft:generic.max_health`).
+-   `attribute`: (String) The name of the attribute to modify (e.g., `minecraft:generic.maxHealth`).
 -   `amount`: (Double) The value of the modifier.
 -   `operation`: (Integer) The operation to apply: `0` for additive, `1` for multiplicative base, `2` for multiplicative total.
 -   `attributeClass`: (String, Optional) The class where the attribute is defined if it's not a standard one.
@@ -140,6 +140,16 @@ Charms nearby villagers, causing them to throw items at the player.
 
 -   `duration`: (Integer) The duration of the effect in seconds.
 
+### MarkRecallAbility
+
+**Type:** `mark_and_recall`  
+**Usage:** Active only
+
+A dual-function ability. When sneaking, it marks the current location (no charge). When not sneaking, it channels and then teleports the player to the marked location (consumes charge).
+
+-   `chargeup`: (Integer) The time in ticks to channel before teleporting (Recall). Default is 60.
+-   `max_distance`: (Double, Optional) Maximum distance in blocks for the recall to work. Default is -1 (infinite).
+
 ### NaturesEmbraceAbility
 
 **Type:** `natures_embrace`  
@@ -212,7 +222,7 @@ Removes all active potion effects from the player.
 
 ### TeleportAbility
 
-**Type:** `lodestone_starbound`, `channeling_teleport`  
+**Type:** `channeling_teleport`  
 **Usage:** Active only
 
 Teleports the player to their spawn point.
@@ -304,7 +314,7 @@ First, create a file named `the_paladin.json` in the `config/menhir/` directory.
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "attack_damage",
+        "attribute": "generic.attackDamage",
         "amount": 0.10,
         "operation": 1
       }
@@ -312,7 +322,7 @@ First, create a file named `the_paladin.json` in the `config/menhir/` directory.
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "armor",
+        "attribute": "generic.armor",
         "amount": 4.0,
         "operation": 0
       }
@@ -371,7 +381,7 @@ For example, if the Paladin's active ability used a potion from the `potioncore`
     {
       "effect": {
         "type": "attribute_modifier",
-        "attribute": "max_health",
+        "attribute": "generic.maxHealth",
         "amount": 0.2,
         "operation": 1
       }
