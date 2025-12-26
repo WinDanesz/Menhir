@@ -250,94 +250,71 @@ task downloadSources {
     }
 }
 
-if (System.getenv('USE_ALPHAS').equals('true')) {
+task setupGithubActions() {
+    doLast {
+        exec {
+            commandLine "echo", "##[set-output name=jar_name;]${project.jar_name}"
+        }
+        if (project.hasProperty('curse_project_id')) {
+            exec {
+                commandLine "echo", "##[set-output name=curse_project_id;]${project.curse_project_id}"
+            }
+            exec {
+                commandLine "echo", "##[set-output name=curse_versions;]${project.curse_versions}"
+            }
+            if (project.hasProperty('curse_relations')) {
+                exec {
+                    commandLine "echo", "##[set-output name=curse_relations;]${project.curse_relations}"
+                }
+            }
+        }
+        exec {
+            commandLine "echo", "##[set-output name=version;]${project.version}"
+        }
+        exec {
+            commandLine "echo", "##[set-output name=name;]${project.name}"
+        }
+        exec {
+            commandLine "echo", "##[set-output name=url;]${project.url}"
+        }
+
+        if (System.getenv('USE_ALPHAS') == 'true') {
+            def getLastTag = {
+                def raw = grgit.describe(longDescr: true, tags: true)
+                def desc = (raw == null ? 'HEAD' : grgit.describe(longDescr: true, tags: true)).split('-') as List
+                desc.remove(desc.size() - 1)
+                desc.remove(desc.size() - 1)
+                def tag = desc.join('-')
+                return tag
+            }
+            def rawLog = grgit.log(includes: ['HEAD'], excludes: [getLastTag()])
+            def log = ""
+            for (org.ajoberstar.grgit.Commit commit : rawLog) {
+                log = log + "[`" + commit.abbreviatedId + "`](https://github.com/${project.github}/commit/" + commit.id + ") " + commit.shortMessage + " - " + commit.author.name + "\\n"
+            }
+
+            exec {
+                commandLine "echo", "##[set-output name=commitlog;]" + "{\"content\":\"" + (project.hasProperty('hook_content') ? project.hook_content : "") + "\",\"embeds\":[{\"author\":{\"name\":\"WinDanesz\",\"url\":\"https://www.curseforge.com/minecraft/mc-mods/ancient-spellcraft\",\"icon_url\":\"https://avatars.githubusercontent.com/u/31292708?s=48&v=4\"},\"title\":\"${project.mod_id}-alpha-${project.version}\",\"url\":\"https://github.com/${project.github}/releases/tag/alpha-${project.version}\",\"color\":14700288,\"description\":\"" + log + "\"}]}"
+            }
+        }
+    }
+}
+
+if (System.getenv('USE_ALPHAS') == 'true') {
     println 'getenv'
-    task setupGithubActions() {
-        def getVersion = {
-            //TAG-offset-hash
-            def raw = grgit.describe(longDescr: true, tags: true, match: ["${project.mc_version}-[0-9].[0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9].[0-9]"])
-            def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags: true, match: ["${project.mc_version}-[0-9].[0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9].[0-9]"])).split('-') as List
-            def hash = desc.remove(desc.size() - 1)
-            def offset = desc.remove(desc.size() - 1)
-            def tag = desc.join('-')
-            return "${tag}.${offset}".toString().replace("${project.mc_version}-", "") //Bake the response instead of making it dynamic
-        }
-        project.mod_version = getVersion();
-        version = project.mc_version + '-' + getVersion();
-        def getLastTag = {
-            def raw = grgit.describe(longDescr: true, tags: true)
-            def desc = (raw == null ? 'HEAD' : grgit.describe(longDescr: true, tags: true)).split('-') as List
-            desc.remove(desc.size() - 1)
-            desc.remove(desc.size() - 1)
-            def tag = desc.join('-')
-            return tag;
-        }
-        def rawLog = grgit.log(includes: ['HEAD'], excludes: [getLastTag()]);
-        def log = "";
-        for (org.ajoberstar.grgit.Commit commit : rawLog) {
-            log = log + "[`" + commit.abbreviatedId + "`](https://github.com/${project.github}/commit/" + commit.id + ") " + commit.shortMessage + " - " + commit.author.name + "\\n";
-        }
-        doLast {
-            exec {
-                commandLine "echo", "##[set-output name=jar_name;]${project.jar_name}";
-            }
-            if (project.hasProperty('curse_project_id')) {
-                exec {
-                    commandLine "echo", "##[set-output name=curse_project_id;]${project.curse_project_id}";
-                }
-                exec {
-                    commandLine "echo", "##[set-output name=curse_versions;]${project.curse_versions}";
-                }
-                if (project.hasProperty('curse_relations')) {
-                    exec {
-                        commandLine "echo", "##[set-output name=curse_relations;]${project.curse_relations}";
-                    }
-                }
-            }
-            exec {
-                commandLine "echo", "##[set-output name=version;]${project.version}";
-            }
-            exec {
-                commandLine "echo", "##[set-output name=name;]${project.name}";
-            }
-            exec {
-                commandLine "echo", "##[set-output name=url;]${project.url}";
-            }
-            exec {
-                commandLine "echo", "##[set-output name=commitlog;]" + "{\"content\":\"" + (project.hasProperty('hook_content') ? project.hook_content : "") + "\",\"embeds\":[{\"author\":{\"name\":\"WinDanesz\",\"url\":\"https://www.curseforge.com/minecraft/mc-mods/ancient-spellcraft\",\"icon_url\":\"https://avatars.githubusercontent.com/u/31292708?s=48&v=4\"},\"title\":\"${project.mod_id}-alpha-${project.version}\",\"url\":\"https://github.com/${project.github}/releases/tag/alpha-${project.version}\",\"color\":14700288,\"description\":\"" + log + "\"}]}";
-            }
-        }
+    def getVersion = {
+        //TAG-offset-hash
+        def raw = grgit.describe(longDescr: true, tags: true, match: ["${project.mc_version}-[0-9].[0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9].[0-9]"])
+        def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags: true, match: ["${project.mc_version}-[0-9].[0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9].[0-9][0-9]", "${project.mc_version}-[0-9].[0-9][0-9].[0-9]", "${project.mc_version}-[0-9][0-9].[0-9].[0-9]"])).split('-') as List
+        def hash = desc.remove(desc.size() - 1)
+        def offset = desc.remove(desc.size() - 1)
+        def tag = desc.join('-')
+        return "${tag}.${offset}".toString().replace("${project.mc_version}-", "") //Bake the response instead of making it dynamic
     }
+    def alphaVersion = getVersion()
+    project.mod_version = alphaVersion
+    version = project.mc_version + '-' + alphaVersion
 } else {
-    task setupGithubActions() {
-        doLast {
-            exec {
-                commandLine "echo", "##[set-output name=jar_name;]${project.jar_name}";
-            }
-            if (project.hasProperty('curse_project_id')) {
-                exec {
-                    commandLine "echo", "##[set-output name=curse_project_id;]${project.curse_project_id}";
-                }
-                exec {
-                    commandLine "echo", "##[set-output name=curse_versions;]${project.curse_versions}";
-                }
-                if (project.hasProperty('curse_relations')) {
-                    exec {
-                        commandLine "echo", "##[set-output name=curse_relations;]${project.curse_relations}";
-                    }
-                }
-            }
-            exec {
-                commandLine "echo", "##[set-output name=version;]${project.version}";
-            }
-            exec {
-                commandLine "echo", "##[set-output name=name;]${project.name}";
-            }
-            exec {
-                commandLine "echo", "##[set-output name=url;]${project.url}";
-            }
-        }
-    }
     version = "${project.mc_version}-${project.mod_version}"
 }
 
