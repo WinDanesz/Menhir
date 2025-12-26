@@ -61,8 +61,8 @@ birthsign.the_hollow.active=Spellshatter: Remove any potion effect affecting you
 birthsign.the_lodestone.name=The Lodestone
 birthsign.the_lodestone.desc=Those born under the sign of The Lodestone are anchored to the earth, drawing strength from below.
 birthsign.the_lodestone.lore=The Lodestone constellation draws power from the deep earth.
-birthsign.the_lodestone.passive=-
-birthsign.the_lodestone.active=Starbound: Teleport to your spawn point
+birthsign.the_lodestone.passive=Earth Anchor: You are steadfast and resistant to knockback (50%%)
+birthsign.the_lodestone.active=Waystone: Sneak+Cast to Mark location (Free). Cast to Recall (Costs Charge). Max Range: 500 blocks.
 
 birthsign.the_mage.name=The Mage
 birthsign.the_mage.desc=Those born under the sign of The Mage possess innate magical prowess and enhanced spell potency.

@@ -19,7 +19,6 @@ public class AbilityFactory {
 		FACTORIES.put("potion_effect", PotionEffectAbility::create);
 		FACTORIES.put("attribute_modifier", AttributeModifierAbility::create);
 		FACTORIES.put("spellshatter", SpellshatterAbility::create);
-		FACTORIES.put("lodestone_starbound", TeleportAbility::create);
 		FACTORIES.put("particle_effect", ParticleEffectAbility::create);
 		FACTORIES.put("channeling_teleport", TeleportAbility::create);
 		FACTORIES.put("arcane_echo", ArcaneEchoAbility::create);
@@ -35,6 +34,7 @@ public class AbilityFactory {
 		FACTORIES.put("give_item", GetItemAbility::create);
 		FACTORIES.put("heal_on_kill", HealOnKillAbility::create);
 		FACTORIES.put("command_ability", CommandAbility::create);
+		FACTORIES.put("mark_and_recall", MarkRecallAbility::create);
 	}
 
 	public static void addFactory(String type, BiFunction<Map<String, Object>, String, IBirthsignActiveAbility> factory) {

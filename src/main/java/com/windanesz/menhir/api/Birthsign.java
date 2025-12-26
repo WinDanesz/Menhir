@@ -75,6 +75,7 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 		BLOCK_PLACEMENT("block_placement"),
 		HEAL_ON_KILL("heal_on_kill"),
 		COMMAND_ABILITY("command_ability"),
+		MARK_AND_RECALL("mark_and_recall"),
 		ARROW_SALVAGE("arrow_salvage");
 
 		private final String jsonName;
