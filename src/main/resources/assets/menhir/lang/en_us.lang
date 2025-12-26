@@ -19,7 +19,7 @@ birthsign.the_blaze.passive=Embercloak: Gain temporary fire resistance upon taki
 birthsign.the_charmer.desc=Those born under the sign of The Charmer possess natural charisma and persuasive abilities.
 birthsign.the_charmer.lore=The Charmer constellation represents the power of words and influence.
 birthsign.the_charmer.name=The Charmer
-birthsign.the_charmer.passive=-
+birthsign.the_charmer.passive=Lucky Charm: You are 50%% luckier
 birthsign.the_charmer.active=Charm: Nearby villages treat you with a boon
 
 birthsign.the_conjuration.active=Arcane Echo: Once per day, if no spell is yet bound, you may bind the held spell book as your Arcane Echo spell while sneaking. This consumes your use for the day. Future activations will cast the bound spell for free, without consuming mana.
@@ -55,7 +55,7 @@ birthsign.the_grove.active=Nature's Embrace: Instantly nourish nearby plants
 birthsign.the_hollow.name=The Hollow
 birthsign.the_hollow.desc=Those born under the sign of The Hollow walk between life and death, wielding necromantic power.
 birthsign.the_hollow.lore=The Hollow constellation dwells at the threshold between worlds.
-birthsign.the_hollow.passive=Warding Mark:Gain the Ward effect, reducing magic damage taken. Your spells are 25%% less potent
+birthsign.the_hollow.passive=Warding Mark: Gain the Ward effect, reducing magic damage taken. Your spells are 25%% less potent
 birthsign.the_hollow.active=Spellshatter: Remove any potion effect affecting you
 
 birthsign.the_lodestone.name=The Lodestone

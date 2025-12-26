@@ -1,6 +1,16 @@
 {
   "name": "the_charmer",
   "active_daily_uses": 1,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "generic.luck",
+        "amount": 0.5,
+        "operation": 0
+      }
+    }
+  ],
   "active": [
     {
       "effect": {
