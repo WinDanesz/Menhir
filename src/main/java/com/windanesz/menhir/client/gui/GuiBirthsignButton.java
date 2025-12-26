@@ -2,11 +2,9 @@ package com.windanesz.menhir.client.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer; // Still needed for parentGui in drawHoveringText
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import java.util.Collections;
 
 public class GuiBirthsignButton extends GuiButton {
     private static final ResourceLocation TEXTURE = new ResourceLocation("menhir", "textures/gui/birthsign_button.png");

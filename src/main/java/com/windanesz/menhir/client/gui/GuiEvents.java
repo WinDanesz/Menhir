@@ -8,9 +8,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import java.util.List;
-
 public class GuiEvents {
 
     @SubscribeEvent
