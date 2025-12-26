@@ -1,13 +1,23 @@
 {
   "name": "the_lodestone",
   "active_daily_uses": 1,
-  "passive": [],
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "generic.knockbackResistance",
+        "amount": 0.5,
+        "operation": 0
+      }
+    }
+  ],
   "active": [
     {
       "effect": {
-        "type": "channeling_teleport",
-        "teleport_destination": "spawn"
+        "type": "mark_and_recall",
+        "chargeup": 60,
+        "max_distance": 500
       }
     }
   ]
-} 
+}
