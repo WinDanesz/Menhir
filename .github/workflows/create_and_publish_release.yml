@@ -12,3 +12,5 @@ jobs:
     secrets:
       CURSEFORGE_API_TOKEN: ${{ secrets.CURSEFORGE_API_TOKEN }}
       DISCORD_ANNOUNCER_WEBHOOK: ${{ secrets.DISCORD_ANNOUNCER_WEBHOOK }}
+    with:
+      build-only: true
