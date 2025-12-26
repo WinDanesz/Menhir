@@ -1,8 +1,6 @@
 package com.windanesz.menhir.eventhandler;
 
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
-import com.windanesz.menhir.network.NetworkHandler;
-import com.windanesz.menhir.network.PacketActivateBirthsignPower;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
