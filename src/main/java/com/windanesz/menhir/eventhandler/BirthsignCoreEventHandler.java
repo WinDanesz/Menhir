@@ -22,11 +22,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Random;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 @Mod.EventBusSubscriber
 public class BirthsignCoreEventHandler {
 
 	private static final int PASSIVE_EFFECT_REAPPLY_INTERVAL = 200; // 10 seconds (200 ticks)
+	private static final Map<net.minecraft.world.World, Boolean> worldMidnightRechargeStatus = new WeakHashMap<>();
 
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
@@ -244,17 +247,20 @@ public class BirthsignCoreEventHandler {
 		if (event.phase != TickEvent.Phase.END) return;
 		if (event.world.isRemote) return;
 
-		// Check if it's midnight (when time reaches 0)
-		long time = event.world.getWorldTime();
+		net.minecraft.world.World world = event.world;
+		long time = world.getWorldTime();
 		long timeOfDay = time % 24000;
 
+		// Get the recharge status for this specific world
+		boolean hasRechargedForMidnight = worldMidnightRechargeStatus.getOrDefault(world, false);
+
 		// Recharge at midnight (time = 0)
-		if (timeOfDay == 0) {
+		if (timeOfDay == 0 && !hasRechargedForMidnight) {
 			if (Menhir.logger != null) {
-				Menhir.logger.info("Midnight reached! Recharging all online players' birthsign charges");
+				Menhir.logger.info("Midnight reached in dimension {}! Recharging all online players' birthsign charges", world.provider.getDimension());
 			}
 			// Recharge all online players' birthsign charges at midnight
-			for (EntityPlayer player : event.world.playerEntities) {
+			for (EntityPlayer player : world.playerEntities) {
 				String playerBirthsignName = getPlayerBirthsign(player);
 				if (playerBirthsignName != null && !playerBirthsignName.isEmpty()) {
 					if (Menhir.logger != null) {
@@ -275,6 +281,10 @@ public class BirthsignCoreEventHandler {
 					}
 				}
 			}
+			worldMidnightRechargeStatus.put(world, true); // Update status for this world
+		} else if (timeOfDay > 0 && hasRechargedForMidnight) {
+			// Reset the flag once midnight has passed
+			worldMidnightRechargeStatus.put(world, false); // Update status for this world
 		}
 	}
 
