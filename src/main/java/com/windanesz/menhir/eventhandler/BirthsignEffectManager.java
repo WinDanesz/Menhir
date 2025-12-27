@@ -98,7 +98,7 @@ public class BirthsignEffectManager {
 		int current = getBirthsignRemainingCharges(player);
 		int newValue = current - 1;
 		setBirthsignRemainingCharges(player, newValue);
-	}
+			}
 
 	/**
 	 * Gets the remaining birthsign passive charges for the player.
@@ -167,7 +167,7 @@ public class BirthsignEffectManager {
 		if (currentCharges < maxCharges) {
 			setBirthsignRemainingCharges(player, maxCharges);
 			player.sendMessage(new net.minecraft.util.text.TextComponentString("§aYour birthsign active abilities have been recharged!"));
-		}
+					}
 	}
 
 	/**
