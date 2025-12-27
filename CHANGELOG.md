@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.1] - 2025-12-27
+### :bug: Bug Fixes
+- [`5e77c00`](https://github.com/WinDanesz/Menhir/commit/5e77c00ab1cfceb400ba0b3745e7b7e47a91833d) - Fix log spam and ability charges not being consumed *(commit by [@WinDanesz](https://github.com/WinDanesz))*
+
+### :wrench: Chores
+- [`c3857db`](https://github.com/WinDanesz/Menhir/commit/c3857db89fb6ac61a24a4369e8500a67a9c83e3f) - fix project details *(commit by [@WinDanesz](https://github.com/WinDanesz))*
+
+
 ## [v1.2.0] - 2025-12-26
 ### :sparkles: New Features
 - [`84c7684`](https://github.com/WinDanesz/Menhir/commit/84c76848e6e5533ea3100076e30371af497446d9) - Added a new arrow_salvage passive ability. Upon hitting an entity with an arrow, the ability has a configurable chance (1-100%) to instantly return the arrow. `passive_daily_uses` limits the maximum amount this can happen a day (-1 = infinite). The Archer now has this new passive ability. *(commit by [@WinDanesz](https://github.com/WinDanesz))*
@@ -28,3 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v1.0.4]: https://github.com/WinDanesz/Menhir/compare/v1.0.3...v1.0.4
 [v1.2.0]: https://github.com/WinDanesz/Menhir/compare/v1.1.0...v1.2.0
+[v1.2.1]: https://github.com/WinDanesz/Menhir/compare/v1.2.0...v1.2.1
