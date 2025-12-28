@@ -13,8 +13,27 @@
   "active": [
     {
       "effect": {
+        "ability_name": "Forged by Fire",
         "type": "repair_item",
         "restore_percent": 0.25
+      }
+    },
+    {
+      "effect": {
+        "ability_name": "Might of the Forge",
+        "type": "potion_effect",
+        "potioneffect": "strength",
+        "amplifier": 1,
+        "duration": 300
+      }
+    },
+    {
+      "effect": {
+        "ability_name": "Might of the Forge",
+        "type": "potion_effect",
+        "potioneffect": "minecraft:speed",
+        "amplifier": 1,
+        "duration": 300
       }
     }
   ]

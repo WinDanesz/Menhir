@@ -8,24 +8,89 @@ import com.windanesz.menhir.capability.BirthsignDataProvider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class BirthsignEffectManager {
 
 	/**
-	 * Reapplies birthsign effects when a player's birthsign changes.
-	 * This removes the old birthsign's effects and applies the new birthsign's effects.
+	 * Helper method to get all active traits (birthsigns, races, etc.) for a player
 	 */
-	public static void reapplyBirthsignEffects(EntityPlayer player, String oldBirthsignName, String newBirthsignName) {
+	public static List<Birthsign> getAllActiveTraits(EntityPlayer player) {
+		List<Birthsign> traits = new ArrayList<>();
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		if (data != null) {
+			Map<String, String> selectedTraits = data.getAllTraits();
+			List<String> traitNames = new ArrayList<>(selectedTraits.values());
+			// Sort trait names to ensure deterministic order
+			java.util.Collections.sort(traitNames);
+			
+			for (String traitName : traitNames) {
+				if (traitName != null && !traitName.isEmpty()) {
+					Birthsign trait = Birthsign.getBirthsignFromString(traitName);
+					if (trait != null) {
+						traits.add(trait);
+					}
+				}
+			}
+		}
+		return traits;
+	}
+
+	/**
+	 * Gets a flattened list of all active abilities from all traits for the player.
+	 * The order is deterministic based on the sorted traits.
+	 * Abilities with the same 'ability_name' (group name) are grouped together into a single entry.
+	 */
+	public static List<IBirthsignActiveAbility> getFlattenedAbilities(EntityPlayer player) {
+		List<IBirthsignActiveAbility> result = new ArrayList<>();
+		java.util.Map<String, com.windanesz.menhir.ability.GroupedActiveAbility> groups = new java.util.HashMap<>();
+		
+		List<Birthsign> traits = getAllActiveTraits(player);
+		for (Birthsign trait : traits) {
+			if (trait.activeAbilities != null) {
+				for (IBirthsignActiveAbility ability : trait.activeAbilities) {
+					String groupName = ability.getGroupName();
+					if (groupName != null && !groupName.isEmpty()) {
+						if (!groups.containsKey(groupName)) {
+							com.windanesz.menhir.ability.GroupedActiveAbility wrapper = new com.windanesz.menhir.ability.GroupedActiveAbility(groupName);
+							wrapper.addChild(ability);
+							groups.put(groupName, wrapper);
+							result.add(wrapper);
+						} else {
+							groups.get(groupName).addChild(ability);
+						}
+					} else {
+						result.add(ability);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Reapplies trait effects when a player's trait changes.
+	 * This removes the old trait's effects and applies the new trait's effects.
+	 */
+	public static void reapplyTraitEffects(EntityPlayer player, String oldTraitName, String newTraitName) {
 		// Remove old birthsign effects
-		if (oldBirthsignName != null && !oldBirthsignName.isEmpty()) {
-			removeBirthsignEffects(player, oldBirthsignName);
+		if (oldTraitName != null && !oldTraitName.isEmpty()) {
+			removeBirthsignEffects(player, oldTraitName);
 		}
 
 		// Apply new birthsign effects
-		if (newBirthsignName != null && !newBirthsignName.isEmpty()) {
-			applyPassiveBirthsignEffects(player, newBirthsignName);
+		if (newTraitName != null && !newTraitName.isEmpty()) {
+			applyPassiveBirthsignEffects(player, newTraitName);
 			// Recharge charges to full when a new birthsign is assigned
 			rechargeBirthsignCharges(player);
 		}
+	}
+	
+	@Deprecated
+	public static void reapplyBirthsignEffects(EntityPlayer player, String oldBirthsignName, String newBirthsignName) {
+		reapplyTraitEffects(player, oldBirthsignName, newBirthsignName);
 	}
 
 	/**
@@ -132,28 +197,22 @@ public class BirthsignEffectManager {
 	 * Gets the maximum birthsign active charges for the player's birthsign.
 	 */
 	public static int getBirthsignMaxCharges(EntityPlayer player) {
-		IBirthsignData data = BirthsignDataProvider.get(player);
-		if (data == null) return 0;
-
-		String birthsign = data.getBirthsign();
-		if (birthsign == null || birthsign.isEmpty()) return 0;
-
-		Birthsign birthsignFromString = Birthsign.getBirthsignFromString(birthsign);
-		return birthsignFromString != null ? birthsignFromString.active_daily_uses : 0;
+		int total = 0;
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			total += trait.active_daily_uses;
+		}
+		return total;
 	}
 
 	/**
 	 * Gets the maximum birthsign passive charges for the player's birthsign.
 	 */
 	public static int getBirthsignMaxPassiveCharges(EntityPlayer player) {
-		IBirthsignData data = BirthsignDataProvider.get(player);
-		if (data == null) return 0;
-
-		String birthsignName = data.getBirthsign();
-		if (birthsignName == null || birthsignName.isEmpty()) return 0;
-
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		return birthsign != null ? birthsign.passive_daily_uses : 0;
+		int total = 0;
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			total += trait.passive_daily_uses;
+		}
+		return total;
 	}
 
 	/**
@@ -202,7 +261,7 @@ public class BirthsignEffectManager {
 		return current + "/" + max + " passive charges remaining";
 	}
 
-	public static void applyBirthsignActiveEffects(EntityPlayer player, String birthsignName) {
+	public static void applyBirthsignActiveEffects(EntityPlayer player, String ignoredBirthsignName) {
 		if (getBirthsignRemainingCharges(player) <= 0) {
 			// Send message to player that they have no charges remaining
 			player.sendMessage(new net.minecraft.util.text.TextComponentString(
@@ -210,29 +269,39 @@ public class BirthsignEffectManager {
 			));
 			return;
 		}
-		boolean decrement = false;
-		Birthsign birthsignFromString = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsignFromString == null || birthsignFromString.activeAbilities == null) {
+		
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		int selectedIndex = data != null ? data.getInt("selected_ability_index") : 0;
+		
+		List<IBirthsignActiveAbility> abilities = getFlattenedAbilities(player);
+		if (abilities.isEmpty()) {
 			return;
 		}
-		for (IBirthsignActiveAbility ability : birthsignFromString.activeAbilities) {
-			if (ability.activate(player, null)) {
-				decrement = true;
-			}
+		
+		if (selectedIndex < 0 || selectedIndex >= abilities.size()) {
+			selectedIndex = 0;
+			// Update the index if it was invalid
+			if (data != null) data.setInt("selected_ability_index", 0);
 		}
+		
+		IBirthsignActiveAbility ability = abilities.get(selectedIndex);
+		boolean decrement = ability.activate(player, null);
 
 		if (decrement) {
 			decrementBirthsignRemainingCharges(player);
 			
 			// Sync to client with full capability data
 			if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
-				IBirthsignData data = BirthsignDataProvider.get(player);
 				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 				if (data != null) {
 					data.writeToNBT(nbt);
 				}
+				// We send the primary birthsign as the key, or just any valid string, the packet handler needs it
+				// to update the GUI maybe? 
+				// Actually packet sync just updates the data on client.
+				String primary = data != null ? data.getBirthsign() : "";
 				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
-					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
+					new com.windanesz.menhir.network.PacketSyncBirthsignData(primary, nbt), 
 					(net.minecraft.entity.player.EntityPlayerMP) player
 				);
 			}

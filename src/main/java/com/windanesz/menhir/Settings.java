@@ -92,5 +92,17 @@ public class Settings {
 		@Config.Name("Inventory Button Y Offset")
 		@Config.Comment("The Y offset of the birthsign button relative to the inventory GUI's top-left corner.")
 		public int inventory_button_y_offset = 65;
+
+		@Config.Name("Radial Menu Enabled")
+		@Config.Comment("If true, the radial menu for spell selection will be enabled.")
+		public boolean radial_menu_enabled = true;
+
+		@Config.Name("Release To Swap")
+		@Config.Comment("If true, releasing the radial menu key will select the highlighted spell. If false, you must click to select.")
+		public boolean release_to_swap = true;
+
+		@Config.Name("Clip Mouse To Circle")
+		@Config.Comment("If true, the mouse cursor will be confined to the radial menu circle while it is open.")
+		public boolean clip_mouse_to_circle = true;
 	}
 }

@@ -24,6 +24,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Random;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class BirthsignCoreEventHandler {
@@ -31,22 +33,45 @@ public class BirthsignCoreEventHandler {
 	private static final int PASSIVE_EFFECT_REAPPLY_INTERVAL = 200; // 10 seconds (200 ticks)
 	private static final Map<net.minecraft.world.World, Boolean> worldMidnightRechargeStatus = new WeakHashMap<>();
 
+	/**
+	 * Helper method to get all active traits (birthsigns, races, etc.) for a player
+	 */
+	private static List<Birthsign> getAllActiveTraits(EntityPlayer player) {
+		List<Birthsign> traits = new ArrayList<>();
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		if (data != null) {
+			Map<String, String> selectedTraits = data.getAllTraits();
+			for (String traitName : selectedTraits.values()) {
+				if (traitName != null && !traitName.isEmpty()) {
+					Birthsign trait = Birthsign.getBirthsignFromString(traitName);
+					if (trait != null) {
+						traits.add(trait);
+					}
+				}
+			}
+		}
+		return traits;
+	}
+
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;
-		String birthsignName = getPlayerBirthsign(player);
-
-		// Sync birthsign data to client with full capability data
+		
+		// Sync all birthsign data to client
 		if (player instanceof EntityPlayerMP) {
 			IBirthsignData data = BirthsignDataProvider.get(player);
 			net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 			if (data != null) {
 				data.writeToNBT(nbt);
 			}
-			NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName != null ? birthsignName : "", nbt), (EntityPlayerMP) player);
+			// Use primary birthsign as the key for packet (compatibility)
+			String primary = data != null ? data.getBirthsign() : "";
+			NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(primary, nbt), (EntityPlayerMP) player);
 		}
 
-		// Check if player doesn't have a birthsign
+		String birthsignName = getPlayerBirthsign(player);
+
+		// Check if player doesn't have a birthsign (primary trait)
 		if (birthsignName == null || birthsignName.isEmpty()) {
 			// Check if random assignment is enabled (selection mode doesn't auto-assign, player chooses manually)
 			if (!Settings.generalSettings.allow_birthsign_selection_on_first_spawn && Settings.generalSettings.random_birthsign_assignment) {
@@ -88,13 +113,17 @@ public class BirthsignCoreEventHandler {
 			}
 		}
 
-		if (birthsignName != null && !birthsignName.isEmpty()) {
-			BirthsignEffectManager.applyPassiveBirthsignEffects(player, birthsignName);
+		// Apply passive effects for ALL traits
+		List<Birthsign> traits = getAllActiveTraits(player);
+		if (!traits.isEmpty()) {
+			for (Birthsign trait : traits) {
+				BirthsignEffectManager.applyPassiveBirthsignEffects(player, trait.getRegistryName().toString());
+			}
 			// Don't recharge active charges when player logs in
 			//birthsignEffectManager.rechargebirthsignCharges(player);
 		} else {
 			if (Menhir.logger != null) {
-				Menhir.logger.info("No birthsign found for player: {}", player.getName());
+				Menhir.logger.info("No traits found for player: {}", player.getName());
 			}
 		}
 	}
@@ -109,25 +138,28 @@ public class BirthsignCoreEventHandler {
 		if (player != null && !player.world.isRemote) {
 			// The capability system should automatically handle NBT persistence
 			// But we need to reapply effects since the player entity is new
-			String birthsignName = getPlayerBirthsign(player);
-			if (birthsignName != null && !birthsignName.isEmpty()) {
-				// Sync birthsign data to client with full capability data
-				if (player instanceof EntityPlayerMP) {
-					IBirthsignData data = BirthsignDataProvider.get(player);
-					if (data != null) {
-						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
-						data.writeToNBT(nbt);
-						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), (EntityPlayerMP) player);
-					}
+			
+			// Sync data first
+			if (player instanceof EntityPlayerMP) {
+				IBirthsignData data = BirthsignDataProvider.get(player);
+				if (data != null) {
+					net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+					data.writeToNBT(nbt);
+					String primary = data.getBirthsign();
+					NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(primary, nbt), (EntityPlayerMP) player);
 				}
-				
-				// Reapply all birthsign effects to the new player entity
-				BirthsignEffectManager.applyPassiveBirthsignEffects(player, birthsignName);
-				// Recharge charges after respawn if enabled in config
-				if (Settings.generalSettings.recharge_charges_on_respawn) {
-					BirthsignEffectManager.rechargeBirthsignCharges(player);
-					BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
-				}
+			}
+			
+			// Reapply all birthsign effects to the new player entity
+			List<Birthsign> traits = getAllActiveTraits(player);
+			for (Birthsign trait : traits) {
+				BirthsignEffectManager.applyPassiveBirthsignEffects(player, trait.getRegistryName().toString());
+			}
+			
+			// Recharge charges after respawn if enabled in config
+			if (Settings.generalSettings.recharge_charges_on_respawn) {
+				BirthsignEffectManager.rechargeBirthsignCharges(player);
+				BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
 			}
 		}
 	}
@@ -140,10 +172,10 @@ public class BirthsignCoreEventHandler {
 	public static void onPlayerChangedDimension(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event) {
 		EntityPlayer player = event.player;
 		if (player != null && !player.world.isRemote) {
-			String playerBirthsign = getPlayerBirthsign(player);
-			if (playerBirthsign != null && !playerBirthsign.isEmpty()) {
+			List<Birthsign> traits = getAllActiveTraits(player);
+			if (!traits.isEmpty()) {
 				if (Menhir.logger != null) {
-					Menhir.logger.info("Reapplying birthsign effects after dimension change for: {} with birthsign: {}", player.getName(), playerBirthsign);
+					Menhir.logger.info("Reapplying trait effects after dimension change for: {}", player.getName());
 				}
 				
 				// Sync birthsign data to client with full capability data
@@ -152,12 +184,15 @@ public class BirthsignCoreEventHandler {
 					if (data != null) {
 						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 						data.writeToNBT(nbt);
-						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(playerBirthsign, nbt), (EntityPlayerMP) player);
+						String primary = data.getBirthsign();
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(primary, nbt), (EntityPlayerMP) player);
 					}
 				}
 				
 				// Reapply effects after dimension change
-				BirthsignEffectManager.applyPassiveBirthsignEffects(player, playerBirthsign);
+				for (Birthsign trait : traits) {
+					BirthsignEffectManager.applyPassiveBirthsignEffects(player, trait.getRegistryName().toString());
+				}
 			}
 		}
 	}
@@ -200,14 +235,16 @@ public class BirthsignCoreEventHandler {
 		if (original != null && clone != null && !clone.world.isRemote) {
 			// Get the original player's birthsign data
 			IBirthsignData originalData = BirthsignDataProvider.get(original);
-			if (originalData != null && originalData.getBirthsign() != null && !originalData.getBirthsign().isEmpty()) {
-				String birthsignName = originalData.getBirthsign();
-
-				// Get the clone's birthsign data capability
-				IBirthsignData cloneData = BirthsignDataProvider.get(clone);
-				if (cloneData != null) {
-					// Transfer the birthsign data to the clone
-					cloneData.setBirthsign(birthsignName);
+			IBirthsignData cloneData = BirthsignDataProvider.get(clone);
+			
+			if (originalData != null && cloneData != null) {
+				Map<String, String> originalTraits = originalData.getAllTraits();
+				
+				if (!originalTraits.isEmpty()) {
+					// Transfer all traits
+					for (Map.Entry<String, String> entry : originalTraits.entrySet()) {
+						cloneData.setTrait(entry.getKey(), entry.getValue());
+					}
 
 					// Also transfer any other birthsign-related data
 					cloneData.setInt("birthsign_remaining_charges", originalData.getInt("birthsign_remaining_charges"));
@@ -217,26 +254,30 @@ public class BirthsignCoreEventHandler {
 					if (clone instanceof EntityPlayerMP) {
 						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 						cloneData.writeToNBT(nbt);
-						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), (EntityPlayerMP) clone);
+						String primary = cloneData.getBirthsign();
+						NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(primary, nbt), (EntityPlayerMP) clone);
 					}
 
 					if (Menhir.logger != null) {
-						Menhir.logger.info("CRITICAL: Transferred birthsign data from {} to clone: {} (wasDeath: {})",
-								original.getName(), birthsignName, wasDeath);
+						Menhir.logger.info("CRITICAL: Transferred trait data from {} to clone (wasDeath: {})",
+								original.getName(), wasDeath);
 					}
 
 					// Apply birthsign effects to the clone immediately
-					BirthsignEffectManager.applyPassiveBirthsignEffects(clone, birthsignName);
+					List<Birthsign> traits = getAllActiveTraits(clone);
+					for (Birthsign trait : traits) {
+						BirthsignEffectManager.applyPassiveBirthsignEffects(clone, trait.getRegistryName().toString());
+					}
 
 					// Recharge charges after respawn if enabled in config
 					if (wasDeath && Settings.generalSettings.recharge_charges_on_respawn) {
 						BirthsignEffectManager.rechargeBirthsignCharges(clone);
 						BirthsignEffectManager.rechargeBirthsignPassiveCharges(clone);
 					}
-				}
-			} else {
-				if (Menhir.logger != null) {
-					Menhir.logger.info("No birthsign data found for original player: {}", original.getName());
+				} else {
+					if (Menhir.logger != null) {
+						Menhir.logger.info("No birthsign data found for original player: {}", original.getName());
+					}
 				}
 			}
 		}
@@ -261,16 +302,17 @@ public class BirthsignCoreEventHandler {
 			}
 			// Recharge all online players' birthsign charges at midnight
 			for (EntityPlayer player : world.playerEntities) {
-				String playerBirthsignName = getPlayerBirthsign(player);
-				if (playerBirthsignName != null && !playerBirthsignName.isEmpty()) {
+				List<Birthsign> traits = getAllActiveTraits(player);
+				if (!traits.isEmpty()) {
 					if (Menhir.logger != null) {
-						Menhir.logger.info("Recharging charges for player: {} with birthsign: {}", player.getName(), playerBirthsignName);
+						Menhir.logger.info("Recharging charges for player: {}", player.getName());
 					}
 					BirthsignEffectManager.rechargeBirthsignCharges(player);
 					BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
 
 					// Reset Arcane Echo binding for The Conjuration birthsign
-					if ("the_conjuration".equals(playerBirthsignName)) {
+					// TODO: Make this generic if other traits need reset
+					if (traits.stream().anyMatch(t -> "the_conjuration".equals(t.getRegistryName().getPath()))) {
 						IBirthsignData birthsignData = BirthsignDataProvider.get(player);
 						if (birthsignData != null) {
 							birthsignData.setInt("arcane_echo_uses", 0);
@@ -299,8 +341,8 @@ public class BirthsignCoreEventHandler {
 
 			// Only recharge if it's daytime (0-12000 ticks) after sleeping
 			if (timeOfDay >= 0 && timeOfDay < 12000) {
-				String playerBirthsign = getPlayerBirthsign(player);
-				if (playerBirthsign != null && !playerBirthsign.isEmpty()) {
+				List<Birthsign> traits = getAllActiveTraits(player);
+				if (!traits.isEmpty()) {
 					// Player slept through the night, recharge their birthsign charges
 					BirthsignEffectManager.rechargeBirthsignCharges(player);
 					BirthsignEffectManager.rechargeBirthsignPassiveCharges(player);
@@ -320,43 +362,45 @@ public class BirthsignCoreEventHandler {
 		if (event.phase != TickEvent.Phase.END) return;
 		if (event.player.world.isRemote) return;
 		EntityPlayer player = event.player;
-		String playerBirthsign = getPlayerBirthsign(player);
-		if (playerBirthsign == null || playerBirthsign.isEmpty()) return;
+		
+		List<Birthsign> traits = getAllActiveTraits(player);
+		if (traits.isEmpty()) return;
 
 		if (player.ticksExisted % PASSIVE_EFFECT_REAPPLY_INTERVAL == 0) {
-			// Reapply passive effects (both potion effects and attribute modifiers)
-			Birthsign birthsign = Birthsign.registry.getValue(new net.minecraft.util.ResourceLocation(playerBirthsign));
-			if (birthsign != null && birthsign.passive != null) {
-				for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-					Birthsign.EffectDetail eff = effect.effect;
-					if (eff.type == Birthsign.EffectType.POTION_EFFECT) {
-						// Reapply the potion effect using the same logic as PotionEffectAbility
-						String potionName = eff.getParameter("potioneffect", "");
-						// Handle both Integer and Long types from JSON
-						Number amplifierNum = eff.getParameter("amplifier", 0);
-						Number durationNum = eff.getParameter("duration", 200);
-						int amplifier = amplifierNum.intValue();
-						int duration = durationNum.intValue();
-						net.minecraft.potion.Potion potion = net.minecraft.potion.Potion.getPotionFromResourceLocation(potionName);
-						if (potion != null) {
-							net.minecraft.potion.PotionEffect potionEffect = new net.minecraft.potion.PotionEffect(potion, duration, amplifier, true, true);
-							player.addPotionEffect(potionEffect);
-						}
-					} else if (eff.type == Birthsign.EffectType.ATTRIBUTE_MODIFIER) {
-						// Reapply attribute modifiers to ensure they're always present
-						String attribute = eff.getParameter("attribute", "");
-						double amount = eff.getParameter("amount", 0.0);
-						Object operationObj = eff.getParameter("operation", 0);
-						int operation = getOperation(String.valueOf(operationObj));
+			// Reapply passive effects (both potion effects and attribute modifiers) for ALL traits
+			for (Birthsign trait : traits) {
+				if (trait.passive != null) {
+					for (Birthsign.BirthsignEffect effect : trait.passive) {
+						Birthsign.EffectDetail eff = effect.effect;
+						if (eff.type == Birthsign.EffectType.POTION_EFFECT) {
+							// Reapply the potion effect using the same logic as PotionEffectAbility
+							String potionName = eff.getParameter("potioneffect", "");
+							// Handle both Integer and Long types from JSON
+							Number amplifierNum = eff.getParameter("amplifier", 0);
+							Number durationNum = eff.getParameter("duration", 200);
+							int amplifier = amplifierNum.intValue();
+							int duration = durationNum.intValue();
+							net.minecraft.potion.Potion potion = net.minecraft.potion.Potion.getPotionFromResourceLocation(potionName);
+							if (potion != null) {
+								net.minecraft.potion.PotionEffect potionEffect = new net.minecraft.potion.PotionEffect(potion, duration, amplifier, true, true);
+								player.addPotionEffect(potionEffect);
+							}
+						} else if (eff.type == Birthsign.EffectType.ATTRIBUTE_MODIFIER) {
+							// Reapply attribute modifiers to ensure they're always present
+							String attribute = eff.getParameter("attribute", "");
+							double amount = eff.getParameter("amount", 0.0);
+							Object operationObj = eff.getParameter("operation", 0);
+							int operation = getOperation(String.valueOf(operationObj));
 
-						BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, birthsign.name);
-						mod.apply(player, birthsign.name);
-					} else if (eff.type == Birthsign.EffectType.UNDERGROUND_HASTE) {
-						// Apply underground haste effect if conditions are met
-						UndergroundHasteAbility.applyHasteIfConditionsMet(player);
-					} else if (eff.type == Birthsign.EffectType.BLOCK_PLACEMENT) {
-						// Block placement effects are handled by the active ability system
-						// No passive effect to apply here
+							BirthsignAttributeModifier mod = new BirthsignAttributeModifier(attribute, amount, operation, trait.name);
+							mod.apply(player, trait.name);
+						} else if (eff.type == Birthsign.EffectType.UNDERGROUND_HASTE) {
+							// Apply underground haste effect if conditions are met
+							UndergroundHasteAbility.applyHasteIfConditionsMet(player);
+						} else if (eff.type == Birthsign.EffectType.BLOCK_PLACEMENT) {
+							// Block placement effects are handled by the active ability system
+							// No passive effect to apply here
+						}
 					}
 				}
 			}
@@ -401,19 +445,19 @@ public class BirthsignCoreEventHandler {
 			return null;
 		}
 
-		java.util.Set<ResourceLocation> birthsignKeys = Birthsign.registry.getKeys();
-		if (birthsignKeys.isEmpty()) {
+		// Filter for only primary birthsigns (category == null or "birthsign")
+		java.util.List<String> birthsignNames = new java.util.ArrayList<>();
+		for (Birthsign b : Birthsign.registry) {
+			if (b.category == null || "birthsign".equals(b.category)) {
+				birthsignNames.add(b.getRegistryName().toString());
+			}
+		}
+
+		if (birthsignNames.isEmpty()) {
 			if (Menhir.logger != null) {
 				Menhir.logger.warn("No birthsigns registered to assign to player: {}", player.getName());
 			}
 			return null;
-		}
-
-
-		// Convert ResourceLocation keys to birthsign names and select a random one
-		java.util.List<String> birthsignNames = new java.util.ArrayList<>();
-		for (ResourceLocation key : birthsignKeys) {
-			birthsignNames.add(key.toString());
 		}
 
 		Random random = new Random();
@@ -422,8 +466,14 @@ public class BirthsignCoreEventHandler {
 		IBirthsignData data = BirthsignDataProvider.get(player);
 		if (data != null) {
 			data.setBirthsign(randomBirthsign);
-			data.setInt("birthsign_remaining_charges", Birthsign.getBirthsignFromString(randomBirthsign).active_daily_uses); // Reset charges
-			data.setInt("birthsign_remaining_passive_charges", Birthsign.getBirthsignFromString(randomBirthsign).passive_daily_uses); // Reset passive charges
+			// Note: This reset logic is still a bit weird with global pools, 
+			// but for initial random assignment it's okay to reset to this birthsign's max.
+			// Ideally we'd calculate total max from all traits, but on first login usually only one trait exists.
+			Birthsign bs = Birthsign.getBirthsignFromString(randomBirthsign);
+			if (bs != null) {
+				data.setInt("birthsign_remaining_charges", bs.active_daily_uses);
+				data.setInt("birthsign_remaining_passive_charges", bs.passive_daily_uses);
+			}
 			return randomBirthsign;
 		}
 		return null;

@@ -15,6 +15,7 @@ public class NetworkHandler {
 		INSTANCE.registerMessage(PacketSyncBirthsignData.Handler.class, PacketSyncBirthsignData.class, 3, Side.CLIENT);
 		INSTANCE.registerMessage(PacketSetBirthsign.Handler.class, PacketSetBirthsign.class, 4, Side.SERVER);
 		INSTANCE.registerMessage(PacketOpenBirthsignSelectionGUI.Handler.class, PacketOpenBirthsignSelectionGUI.class, 5, Side.CLIENT);
+		INSTANCE.registerMessage(PacketSelectActiveAbility.class, PacketSelectActiveAbility.Message.class, 6, Side.SERVER);
 	}
 
 	public static void sendToServer(Object message) {

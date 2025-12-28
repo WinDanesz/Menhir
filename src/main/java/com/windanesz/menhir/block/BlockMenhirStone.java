@@ -2,6 +2,7 @@ package com.windanesz.menhir.block;
 
 import com.windanesz.menhir.Menhir;
 import com.windanesz.menhir.Settings;
+import com.windanesz.menhir.api.Birthsign;
 import com.windanesz.menhir.api.IBirthsignData;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
 import com.windanesz.menhir.eventhandler.BirthsignEffectManager;
@@ -24,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -227,6 +229,25 @@ public class BlockMenhirStone extends Block {
 			if (birthsign != null) {
 				String birthsignName = birthsign.getBirthsign();
 				if (birthsignName != null && !birthsignName.isEmpty()) {
+					// Validate that the birthsign is of the correct category
+					boolean isValidCategory = false;
+					try {
+						ResourceLocation rl = new ResourceLocation(birthsignName);
+						if (Birthsign.registry != null) {
+							Birthsign bs = Birthsign.registry.getValue(rl);
+							if (bs != null && (bs.category == null || "birthsign".equals(bs.category))) {
+								isValidCategory = true;
+							}
+						}
+					} catch (Exception e) {
+						// Invalid resource location format
+					}
+
+					if (!isValidCategory) {
+						playerIn.sendMessage(new TextComponentString("§cThis Menhir Stone has an incompatible power."));
+						return true;
+					}
+
 					IBirthsignData birthsignData = BirthsignDataProvider.get(playerIn);
 					if (birthsignData != null) {
 						String currentBirthsign = birthsignData.getBirthsign();

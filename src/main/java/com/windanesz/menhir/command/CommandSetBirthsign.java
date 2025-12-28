@@ -44,30 +44,38 @@ public class CommandSetBirthsign extends CommandBase {
 		String birthsignName = args[1];
 		Birthsign birthsign = Birthsign.registry.getValue(new net.minecraft.util.ResourceLocation(birthsignName));
 		if (birthsign == null) {
-			sender.sendMessage(new TextComponentString("Unknown birthsign: " + birthsignName));
+			sender.sendMessage(new TextComponentString("Unknown trait/birthsign: " + birthsignName));
 			return;
 		}
 
-		// Get the player's current birthsign data
+		// Get the category from the birthsign/trait object
+		String category = birthsign.category;
+		if (category == null || category.isEmpty()) {
+			category = "birthsign";
+		}
+
+		// Get the player's current data
 		IBirthsignData data = BirthsignDataProvider.get(player);
 		if (data == null) {
-			sender.sendMessage(new TextComponentString("Failed to get birthsign data for player: " + player.getName()));
+			sender.sendMessage(new TextComponentString("Failed to get data for player: " + player.getName()));
 			return;
 		}
 
-		// Get the old birthsign before changing it
-		String oldBirthsign = data.getBirthsign();
+		// Get the old trait for this category before changing it
+		String oldTrait = data.getTrait(category);
 
-		// Set the new birthsign
-		data.setBirthsign(birthsignName);
+		// Set the new trait
+		data.setTrait(category, birthsignName);
 
 		// Sync to client with full capability data
 		net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 		data.writeToNBT(nbt);
-		NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), player);
+		// We send the primary birthsign as the key for compatibility, the map is in the NBT
+		String primary = data.getBirthsign();
+		NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(primary, nbt), player);
 
-		// Reapply birthsign effects (this will remove old effects and apply new ones)
-		BirthsignEffectManager.reapplyBirthsignEffects(player, oldBirthsign, birthsignName);
+		// Reapply effects (this will remove old effects and apply new ones for this category)
+		BirthsignEffectManager.reapplyTraitEffects(player, oldTrait, birthsignName);
 
 		// Get the localized birthsign name for display
 		String birthsignNameForTranslation = birthsignName;
@@ -76,7 +84,7 @@ public class CommandSetBirthsign extends CommandBase {
 		}
 		String localizedBirthsignName = Menhir.proxy.translate("birthsign." + birthsignNameForTranslation + ".name");
 
-		sender.sendMessage(new TextComponentString("Set birthsign for " + player.getName() + " to " + localizedBirthsignName));
+		sender.sendMessage(new TextComponentString("Set " + category + " for " + player.getName() + " to " + localizedBirthsignName));
 	}
 
 	@Override

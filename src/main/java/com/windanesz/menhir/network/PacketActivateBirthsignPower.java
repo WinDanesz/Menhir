@@ -32,10 +32,9 @@ public class PacketActivateBirthsignPower implements IMessage {
 			server.addScheduledTask(() -> {
 				IBirthsignData data = BirthsignDataProvider.get(player);
 				if (data != null) {
-					String birthsignName = data.getBirthsign();
-					if (birthsignName != null && !birthsignName.isEmpty()) {
-						BirthsignEffectManager.applyBirthsignActiveEffects(player, birthsignName);
-					}
+					// We pass an empty string because the method ignores it anyway, 
+					// and we don't want to restrict usage to only having a "birthsign" trait set.
+					BirthsignEffectManager.applyBirthsignActiveEffects(player, "");
 				}
 			});
 			return null;

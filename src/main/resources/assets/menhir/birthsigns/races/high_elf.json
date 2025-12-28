@@ -1,0 +1,42 @@
+{
+  "name": "high_elf",
+  "category": "race",
+  "active_daily_uses": 1,
+  "passive_daily_uses": 0,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "generic.maxHealth",
+        "amount": -10.0,
+        "operation": 0
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "artemislib.entityHeight",
+        "amount": 0.1,
+        "operation": 1
+      }
+    },
+    {
+      "effect": {
+        "type": "wizardry_spell_modifier",
+        "name": "wizardryutils:potency",
+        "amount": 0.15
+      }
+    }
+  ],
+  "active": [
+    {
+      "effect": {        
+        "ability_name": "Elven Vision",
+        "type": "potion_effect",
+        "potioneffect": "minecraft:night_vision",
+        "amplifier": 0,
+        "duration": 600
+      }
+    }
+  ]
+}

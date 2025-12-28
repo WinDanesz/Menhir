@@ -28,8 +28,32 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @Mod.EventBusSubscriber
 public class BirthsignAbilityEventHandler {
+
+	/**
+	 * Helper method to get all active traits (birthsigns, races, etc.) for a player
+	 */
+	private static List<Birthsign> getAllActiveTraits(EntityPlayer player) {
+		List<Birthsign> traits = new ArrayList<>();
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		if (data != null) {
+			Map<String, String> selectedTraits = data.getAllTraits();
+			for (String traitName : selectedTraits.values()) {
+				if (traitName != null && !traitName.isEmpty()) {
+					Birthsign trait = Birthsign.getBirthsignFromString(traitName);
+					if (trait != null) {
+						traits.add(trait);
+					}
+				}
+			}
+		}
+		return traits;
+	}
 
 	/**
 	 * Handles fall damage reduction for any birthsign with the FALL_DAMAGE_REDUCTION effect type
@@ -52,66 +76,65 @@ public class BirthsignAbilityEventHandler {
 
 		if (event.getRayTraceResult() == null || event.getRayTraceResult().entityHit == null) return;
 
-		String birthsignName = getPlayerBirthsign(player);
-		if (birthsignName == null) return;
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			if (trait.passive == null) continue;
 
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
+			for (Birthsign.BirthsignEffect effect : trait.passive) {
+				if (effect.effect != null && effect.effect.type == Birthsign.EffectType.ARROW_SALVAGE) {
 
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.ARROW_SALVAGE) {
+					ItemStack mainHand = player.getHeldItemMainhand();
+					ItemStack offHand = player.getHeldItemOffhand();
+					boolean hasInfinityBow = (mainHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, mainHand) > 0) ||
+							(offHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, offHand) > 0);
 
-				ItemStack mainHand = player.getHeldItemMainhand();
-				ItemStack offHand = player.getHeldItemOffhand();
-				boolean hasInfinityBow = (mainHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, mainHand) > 0) ||
-						(offHand.getItem() instanceof ItemBow && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, offHand) > 0);
+					if (!hasInfinityBow) {
+						int recoveryChance = effect.effect.getParameter("chance", 100);
 
-				if (!hasInfinityBow) {
-					int recoveryChance = effect.effect.getParameter("chance", 100);
+						if (player.world.rand.nextInt(100) < recoveryChance) {
+							int maxPassiveCharges = trait.passive_daily_uses;
 
-					if (player.world.rand.nextInt(100) < recoveryChance) {
-						int maxPassiveCharges = birthsign.passive_daily_uses;
-
-						if (maxPassiveCharges > -1) {
-							int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
-							if (currentPassiveCharges <= 0) {
-								return; // No charges left
-							}
-							BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
-							// client sync
-							if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
-								IBirthsignData data = BirthsignDataProvider.get(player);
-								if (birthsignName != null) {
-									net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+							if (maxPassiveCharges > -1) {
+								int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
+								if (currentPassiveCharges <= 0) {
+									return; // No charges left
+								}
+								BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+								// client sync
+								if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+									IBirthsignData data = BirthsignDataProvider.get(player);
 									if (data != null) {
+										net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
 										data.writeToNBT(nbt);
+										com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+												new com.windanesz.menhir.network.PacketSyncBirthsignData(trait.name, nbt),
+												(net.minecraft.entity.player.EntityPlayerMP) player
+										);
 									}
-									com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
-											new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt),
-											(net.minecraft.entity.player.EntityPlayerMP) player
-									);
 								}
 							}
-						}
 
-						ItemStack arrowStack;
-						try {
-							java.lang.reflect.Method getArrowStackMethod = EntityArrow.class.getDeclaredMethod("getArrowStack");
-							getArrowStackMethod.setAccessible(true);
-							arrowStack = (ItemStack) getArrowStackMethod.invoke(event.getArrow());
-						} catch (Exception e) {
-							arrowStack = new ItemStack(net.minecraft.init.Items.ARROW);
-							Menhir.logger.warn("Could not get arrow itemstack via reflection", e);
-						}
+							ItemStack arrowStack;
+							try {
+								java.lang.reflect.Method getArrowStackMethod = EntityArrow.class.getDeclaredMethod("getArrowStack");
+								getArrowStackMethod.setAccessible(true);
+								arrowStack = (ItemStack) getArrowStackMethod.invoke(event.getArrow());
+							} catch (Exception e) {
+								arrowStack = new ItemStack(net.minecraft.init.Items.ARROW);
+								Menhir.logger.warn("Could not get arrow itemstack via reflection", e);
+							}
 
-						if (!player.inventory.addItemStackToInventory(arrowStack.copy())) {
-							player.dropItem(arrowStack.copy(), false);
-						}
+							if (!player.inventory.addItemStackToInventory(arrowStack.copy())) {
+								player.dropItem(arrowStack.copy(), false);
+							}
 
-						event.getArrow().setDead();
+							event.getArrow().setDead();
+						}
 					}
+					// Found an arrow salvage trait, break to avoid double salvage from multiple traits if that's a concern,
+					// or continue to allow stacking. Let's break for this specific trait's effect loop, but maybe we should break entirely?
+					// For now, let's break inner loop.
+					break;
 				}
-				break;
 			}
 		}
 	}
@@ -124,10 +147,12 @@ public class BirthsignAbilityEventHandler {
 	public static void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.getEntityLiving() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.getEntityLiving();
+			List<Birthsign> activeTraits = getAllActiveTraits(player);
 
-			// Get the player's birthsign
-			String birthsignName = getPlayerBirthsign(player);
-			if (birthsignName != null && "menhir:the_thief".equals(birthsignName)) {
+			// Check if "menhir:the_thief" is active
+			boolean isThief = activeTraits.stream().anyMatch(t -> "menhir:the_thief".equals(t.getRegistryName().toString()));
+
+			if (isThief) {
 				// Check if player is sneaking
 				if (player.isSneaking()) {
 					// Apply sneaking speed bonus
@@ -140,16 +165,18 @@ public class BirthsignAbilityEventHandler {
 				}
 			}
 
-			// Handle passive abilities dynamically based on birthsign configuration
-			if (birthsignName != null) {
-				// Check for passive abilities every few ticks to avoid performance issues
-				if (player.ticksExisted % 20 == 0) { // Every second
-					handlePassiveAbilities(player, birthsignName);
+			// Handle passive abilities dynamically based on trait configuration
+			// Check for passive abilities every few ticks to avoid performance issues
+			if (player.ticksExisted % 20 == 0) { // Every second
+				for (Birthsign trait : activeTraits) {
+					handlePassiveAbilities(player, trait);
 				}
+			}
 
-				// Handle Verdant Bond passive ability for plant growth acceleration
-				if (player.ticksExisted % 600 == 0) { // Every 30 seconds for plant growth
-					handleVerdantBond(player, birthsignName);
+			// Handle Verdant Bond passive ability for plant growth acceleration
+			if (player.ticksExisted % 600 == 0) { // Every 30 seconds for plant growth
+				for (Birthsign trait : activeTraits) {
+					handleVerdantBond(player, trait);
 				}
 			}
 		}
@@ -163,29 +190,27 @@ public class BirthsignAbilityEventHandler {
 	public static void onAttackEntity(AttackEntityEvent event) {
 		if (event.getEntityPlayer() != null && !event.getEntityPlayer().world.isRemote) {
 			EntityPlayer player = event.getEntityPlayer();
-			String birthsignName = getPlayerBirthsign(player);
+			
+			for (Birthsign trait : getAllActiveTraits(player)) {
+				if (trait.passive == null) continue;
 
-			if (birthsignName != null) {
-				Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-				if (birthsign != null && birthsign.passive != null) {
-					for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-						if (effect.effect != null && effect.effect.type == Birthsign.EffectType.BURNING_ATTACK) {
+				for (Birthsign.BirthsignEffect effect : trait.passive) {
+					if (effect.effect != null && effect.effect.type == Birthsign.EffectType.BURNING_ATTACK) {
 
-							double igniteChance = effect.effect.getParameter("ignite_chance", 0.20);
-							int igniteDuration = ((Number) effect.effect.getParameter("ignite_duration", 3)).intValue();
+						double igniteChance = effect.effect.getParameter("ignite_chance", 0.20);
+						int igniteDuration = ((Number) effect.effect.getParameter("ignite_duration", 3)).intValue();
 
-							// Check if we should ignite the target
-							if (player.world.rand.nextDouble() < igniteChance) {
-								if (event.getTarget() instanceof net.minecraft.entity.EntityLivingBase) {
-									net.minecraft.entity.EntityLivingBase target = (net.minecraft.entity.EntityLivingBase) event.getTarget();
-									target.setFire(igniteDuration);
+						// Check if we should ignite the target
+						if (player.world.rand.nextDouble() < igniteChance) {
+							if (event.getTarget() instanceof net.minecraft.entity.EntityLivingBase) {
+								net.minecraft.entity.EntityLivingBase target = (net.minecraft.entity.EntityLivingBase) event.getTarget();
+								target.setFire(igniteDuration);
 
-									// Send message to player
-									player.sendMessage(new net.minecraft.util.text.TextComponentString(net.minecraft.util.text.TextFormatting.GOLD + "Smoldering Strikes ignited your target for " + igniteDuration + " seconds!"));
-								}
+								// Send message to player
+								player.sendMessage(new net.minecraft.util.text.TextComponentString(net.minecraft.util.text.TextFormatting.GOLD + "Smoldering Strikes ignited your target for " + igniteDuration + " seconds!"));
 							}
-							break;
 						}
+						break;
 					}
 				}
 			}
@@ -200,13 +225,12 @@ public class BirthsignAbilityEventHandler {
 	public static void handleSpellModifierPassive(SpellCastEvent.Pre event) {
 		if (!event.getWorld().isRemote && event.getCaster() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.getCaster();
-			// Get the player's birthsign
-			String birthsignName = getPlayerBirthsign(player);
-			// Apply spell potency bonus using wizardryutils.SpellPotency attribute
-			Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-			if (birthsign != null) {
+			
+			for (Birthsign trait : getAllActiveTraits(player)) {
+				if (trait.passive == null) continue;
+				
 				// for each passive in birthsign
-				for (Birthsign.BirthsignEffect effect : birthsign.passive) {
+				for (Birthsign.BirthsignEffect effect : trait.passive) {
 					// if the passive is a spell potency bonus
 					if (effect.effect.type == Birthsign.EffectType.WIZARDRY_SPELL_MODIFIER) {
 						// apply the spell potency bonus
@@ -222,8 +246,10 @@ public class BirthsignAbilityEventHandler {
 
 	public static void handleMageWeakness(LivingHurtEvent event) {
 		EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-		String birthsignName = getPlayerBirthsign(player);
-		if ("menhir:the_mage".equals(birthsignName)) {
+		List<Birthsign> activeTraits = getAllActiveTraits(player);
+		boolean isMage = activeTraits.stream().anyMatch(t -> "menhir:the_mage".equals(t.getRegistryName().toString()));
+		
+		if (isMage) {
 			// Check if the damage is from a magical source
 			if (isMagicalDamage(event.getSource())) {
 				// Apply 15% magic damage vulnerability
@@ -239,36 +265,36 @@ public class BirthsignAbilityEventHandler {
 	 */
 	public static void handleFallDamageReduction(LivingHurtEvent event) {
 		EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-		String birthsignName = getPlayerBirthsign(player);
-		if (birthsignName == null) return;
+		
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			if (trait.passive == null) continue;
 
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
+			// Check if this birthsign has fall damage reduction
+			boolean hasFallDamageReduction = false;
+			double fallDamageHeightThreshold = 6.0f; // Default height threshold in blocks
 
-		// Check if this birthsign has fall damage reduction
-		boolean hasFallDamageReduction = false;
-		double fallDamageHeightThreshold = 6.0f; // Default height threshold in blocks
-
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.FALL_DAMAGE_REDUCTION) {
-				hasFallDamageReduction = true;
-				// Use custom height threshold if specified, otherwise use default
-				Double threshold = effect.effect.getParameter("fall_damage_height_threshold", null);
-				if (threshold != null) {
-					fallDamageHeightThreshold = threshold;
+			for (Birthsign.BirthsignEffect effect : trait.passive) {
+				if (effect.effect != null && effect.effect.type == Birthsign.EffectType.FALL_DAMAGE_REDUCTION) {
+					hasFallDamageReduction = true;
+					// Use custom height threshold if specified, otherwise use default
+					Double threshold = effect.effect.getParameter("fall_damage_height_threshold", null);
+					if (threshold != null) {
+						fallDamageHeightThreshold = threshold;
+					}
+					break;
 				}
-				break;
 			}
-		}
 
-		if (!hasFallDamageReduction) return;
-
-		// Check if the damage is from falling
-		if (event.getSource() == DamageSource.FALL) {
-			// Check if fall distance is under the threshold
-			if (player.fallDistance < fallDamageHeightThreshold) {
-				// Cancel the fall damage for drops under the threshold
-				event.setCanceled(true);
+			if (hasFallDamageReduction) {
+				// Check if the damage is from falling
+				if (event.getSource() == DamageSource.FALL) {
+					// Check if fall distance is under the threshold
+					if (player.fallDistance < fallDamageHeightThreshold) {
+						// Cancel the fall damage for drops under the threshold
+						event.setCanceled(true);
+						return; // Handled, return
+					}
+				}
 			}
 		}
 	}
@@ -279,63 +305,61 @@ public class BirthsignAbilityEventHandler {
 	 */
 	public static void handleSpatialSlip(LivingHurtEvent event) {
 		EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-		String birthsignName = getPlayerBirthsign(player);
-		if (birthsignName == null) return;
-
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
-
-		// Check if this birthsign has the spatial_slip passive ability
-		boolean hasSpatialSlip = false;
-
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.SPATIAL_SLIP) {
-				hasSpatialSlip = true;
-				break;
-			}
-		}
-
-		if (!hasSpatialSlip) return;
-
-		// Only trigger on fall damage
-		if (event.getSource() != net.minecraft.util.DamageSource.FALL) return;
-
-		// Check if this damage would be lethal (would kill the player)
-		if (event.getAmount() >= player.getHealth()) {
-			// Check if player has passive charges available
-			int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
-			if (currentPassiveCharges <= 0) {
-				return; // No passive charges available, can't use spatial slip
-			}
-
-		player.world.playEvent(2003, player.getPosition(), 0); // Portal particles
-
-		// Consume a passive charge
-		BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
 		
-		// Sync to client with full capability data
-		if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
-			IBirthsignData data = BirthsignDataProvider.get(player);
-			if (birthsignName != null) {
-				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
-				if (data != null) {
-					data.writeToNBT(nbt);
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			if (trait.passive == null) continue;
+
+			// Check if this birthsign has the spatial_slip passive ability
+			boolean hasSpatialSlip = false;
+
+			for (Birthsign.BirthsignEffect effect : trait.passive) {
+				if (effect.effect != null && effect.effect.type == Birthsign.EffectType.SPATIAL_SLIP) {
+					hasSpatialSlip = true;
+					break;
 				}
-				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
-					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
-					(net.minecraft.entity.player.EntityPlayerMP) player
-				);
 			}
-		}
 
-		// Cancel the lethal damage
-			event.setCanceled(true);
+			if (!hasSpatialSlip) continue;
 
-			// Send message to player
-			player.sendMessage(new net.minecraft.util.text.TextComponentString("Spatial Slip activated! You teleported to safety."));
+			// Only trigger on fall damage
+			if (event.getSource() != net.minecraft.util.DamageSource.FALL) continue;
 
-			if (Menhir.logger != null) {
-				Menhir.logger.info("Spatial Slip activated for player {} with {} passive charges remaining", player.getName(), currentPassiveCharges - 1);
+			// Check if this damage would be lethal (would kill the player)
+			if (event.getAmount() >= player.getHealth()) {
+				// Check if player has passive charges available
+				int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
+				if (currentPassiveCharges <= 0) {
+					continue; // No passive charges available, try next trait?
+				}
+
+				player.world.playEvent(2003, player.getPosition(), 0); // Portal particles
+
+				// Consume a passive charge
+				BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+				
+				// Sync to client with full capability data
+				if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+					IBirthsignData data = BirthsignDataProvider.get(player);
+					if (data != null) {
+						net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+						data.writeToNBT(nbt);
+						com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+							new com.windanesz.menhir.network.PacketSyncBirthsignData(trait.name, nbt), 
+							(net.minecraft.entity.player.EntityPlayerMP) player
+						);
+					}
+				}
+
+				// Cancel the lethal damage
+				event.setCanceled(true);
+
+				// Send message to player
+				player.sendMessage(new net.minecraft.util.text.TextComponentString("Spatial Slip activated! You teleported to safety."));
+
+				if (Menhir.logger != null) {
+					Menhir.logger.info("Spatial Slip activated for player {} with {} passive charges remaining", player.getName(), currentPassiveCharges - 1);
+				}
+				return; // Handled, stop checking
 			}
 		}
 	}
@@ -346,49 +370,48 @@ public class BirthsignAbilityEventHandler {
 	 */
 	public static void handleFireImmunity(LivingHurtEvent event) {
 		EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-		String birthsignName = getPlayerBirthsign(player);
-		if (birthsignName == null) return;
+		
+		for (Birthsign trait : getAllActiveTraits(player)) {
+			if (trait.passive == null) continue;
 
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
+			// Check if this birthsign has fire immunity
+			boolean hasFireImmunity = false;
+			int duration = 300;
 
-		// Check if this birthsign has fire immunity
-		boolean hasFireImmunity = false;
-		int duration = 300;
+			for (Birthsign.BirthsignEffect effect : trait.passive) {
+				if (effect.effect != null && effect.effect.type == Birthsign.EffectType.FIRE_IMMUNITY) {
+					hasFireImmunity = true;
 
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.FIRE_IMMUNITY) {
-				hasFireImmunity = true;
+					Integer fireDuration = ((Long)effect.effect.getParameter("fire_immunity_duration", 1L)).intValue();
+					if (fireDuration != null) {
+						duration = fireDuration;
+					}
 
-				Integer fireDuration = ((Long)effect.effect.getParameter("fire_immunity_duration", 1L)).intValue();
-				if (fireDuration != null) {
-					duration = fireDuration;
+					// Check if player has passive charges available
+					int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
+					if (currentPassiveCharges <= 0) {
+						break; // No passive charges available, can't use fire immunity
+					}
+
+					// Consume a passive charge
+					BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
+					
+					// Sync to client with full capability data
+					if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
+						IBirthsignData data = BirthsignDataProvider.get(player);
+						if (data != null) {
+							net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+							data.writeToNBT(nbt);
+							com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
+								new com.windanesz.menhir.network.PacketSyncBirthsignData(trait.name, nbt), 
+								(net.minecraft.entity.player.EntityPlayerMP) player
+							);
+						}
+					}
+
+					player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, duration));
+					break;
 				}
-
-				// Check if player has passive charges available
-				int currentPassiveCharges = BirthsignEffectManager.getBirthsignRemainingPassiveCharges(player);
-				if (currentPassiveCharges <= 0) {
-					return; // No passive charges available, can't use fire immunity
-				}
-
-			// Consume a passive charge
-			BirthsignEffectManager.decrementBirthsignRemainingPassiveCharges(player);
-			
-			// Sync to client with full capability data
-			if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
-				IBirthsignData data = BirthsignDataProvider.get(player);
-				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
-				if (data != null) {
-					data.writeToNBT(nbt);
-				}
-				com.windanesz.menhir.network.NetworkHandler.INSTANCE.sendTo(
-					new com.windanesz.menhir.network.PacketSyncBirthsignData(birthsignName, nbt), 
-					(net.minecraft.entity.player.EntityPlayerMP) player
-				);
-			}
-
-			player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, duration));				break;
-
 			}
 		}
 	}
@@ -424,7 +447,9 @@ public class BirthsignAbilityEventHandler {
 
 	/**
 	 * Gets the player's assigned birthsign from the capability system.
+	 * @deprecated Use getAllActiveTraits instead
 	 */
+	@Deprecated
 	private static String getPlayerBirthsign(EntityPlayer player) {
 		IBirthsignData data = BirthsignDataProvider.get(player);
 		return data != null ? data.getBirthsign() : null;
@@ -433,11 +458,10 @@ public class BirthsignAbilityEventHandler {
 	/**
 	 * Handles passive abilities dynamically based on birthsign configuration
 	 */
-	private static void handlePassiveAbilities(EntityPlayer player, String birthsignName) {
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
+	private static void handlePassiveAbilities(EntityPlayer player, Birthsign trait) {
+		if (trait == null || trait.passive == null) return;
 
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
+		for (Birthsign.BirthsignEffect effect : trait.passive) {
 			if (effect.effect != null && effect.effect.type != null) {
 				// Handle custom passive abilities based on effect type
 				if (effect.effect.type == Birthsign.EffectType.THREAT_SENSE) {
@@ -448,7 +472,7 @@ public class BirthsignAbilityEventHandler {
 		}
 
 		// Handle factory-based passive abilities as fallback
-		BirthsignDataLoader.PassiveAbilityFactory passiveFactory = getPassiveAbilityFactory(birthsignName);
+		BirthsignDataLoader.PassiveAbilityFactory passiveFactory = getPassiveAbilityFactory(trait.name);
 		if (passiveFactory != null) {
 			Runnable abilityRunner = passiveFactory.create(player);
 			if (abilityRunner != null) {
@@ -467,19 +491,17 @@ public class BirthsignAbilityEventHandler {
 		// Check if a player caused the death
 		if (event.getSource().getTrueSource() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.getSource().getTrueSource();
-			String birthsignName = getPlayerBirthsign(player);
+			
+			for (Birthsign trait : getAllActiveTraits(player)) {
+				if (trait.passive == null) continue;
 
-			if (birthsignName != null) {
-				Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-				if (birthsign != null && birthsign.passive != null) {
-					for (Birthsign.BirthsignEffect effect : birthsign.passive) {
-						if (effect.effect == null) continue;
+				for (Birthsign.BirthsignEffect effect : trait.passive) {
+					if (effect.effect == null) continue;
 
-						if (effect.effect.type == Birthsign.EffectType.HEAL_ON_KILL) {
-							// Create the HealOnKillAbility from the effect parameters
-							HealOnKillAbility healAbility = (HealOnKillAbility) HealOnKillAbility.create(effect.effect.parameters, birthsignName);
-							healAbility.onKill(player, event.getEntityLiving());
-						}
+					if (effect.effect.type == Birthsign.EffectType.HEAL_ON_KILL) {
+						// Create the HealOnKillAbility from the effect parameters
+						HealOnKillAbility healAbility = (HealOnKillAbility) HealOnKillAbility.create(effect.effect.parameters, trait.name);
+						healAbility.onKill(player, event.getEntityLiving());
 					}
 				}
 			}
@@ -516,15 +538,14 @@ public class BirthsignAbilityEventHandler {
 	 * Handles Verdant Bond passive ability for any birthsign with the VERDANT_BOND effect type
 	 * Players with this ability accelerate plant growth in their radius
 	 */
-	private static void handleVerdantBond(EntityPlayer player, String birthsignName) {
-		Birthsign birthsign = Birthsign.getBirthsignFromString(birthsignName);
-		if (birthsign == null || birthsign.passive == null) return;
+	private static void handleVerdantBond(EntityPlayer player, Birthsign trait) {
+		if (trait == null || trait.passive == null) return;
 
-		for (Birthsign.BirthsignEffect effect : birthsign.passive) {
+		for (Birthsign.BirthsignEffect effect : trait.passive) {
 			if (effect.effect != null && effect.effect.type == Birthsign.EffectType.VERDANT_BOND) {
 
 				// Create and use the VerdantBondAbility to accelerate plant growth
-				VerdantBondAbility verdantAbility = VerdantBondAbility.create(java.util.Collections.singletonMap("radius", effect.effect.getParameter("verdant_radius", 15)), birthsignName);
+				VerdantBondAbility verdantAbility = VerdantBondAbility.create(java.util.Collections.singletonMap("radius", effect.effect.getParameter("verdant_radius", 15)), trait.name);
 
 				verdantAbility.acceleratePlantGrowth(player);
 				break;

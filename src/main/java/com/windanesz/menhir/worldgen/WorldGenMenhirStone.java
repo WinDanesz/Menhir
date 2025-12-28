@@ -88,8 +88,12 @@ public class WorldGenMenhirStone implements IWorldGenerator {
 			//Menhir.logger.info("Registry keys: {}", Birthsign.registry.getKeys());
 
 			for (Birthsign birthsign : Birthsign.registry.getValues()) {
-				String birthsignName = birthsign.getRegistryName().toString();
-				birthsignNames.add(birthsignName);
+				// Only include actual birthsigns (null or "birthsign" category)
+				// Filter out races and other custom categories
+				if (birthsign.category == null || "birthsign".equals(birthsign.category)) {
+					String birthsignName = birthsign.getRegistryName().toString();
+					birthsignNames.add(birthsignName);
+				}
 				//	Menhir.logger.info("Found birthsign in registry: {}", birthsignName);
 			}
 			//Menhir.logger.info("Total birthsigns in registry: {}", birthsignNames.size());

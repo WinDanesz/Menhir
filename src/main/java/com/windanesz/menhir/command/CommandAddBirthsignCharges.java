@@ -69,11 +69,13 @@ public class CommandAddBirthsignCharges extends CommandBase {
 		IBirthsignData data = BirthsignDataProvider.get(player);
 		if (data != null) {
 			String birthsignName = data.getBirthsign();
-			if (birthsignName != null && !birthsignName.isEmpty()) {
-				net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
-				data.writeToNBT(nbt);
-				NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), player);
+			if (birthsignName == null) {
+				birthsignName = "";
 			}
+			
+			net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+			data.writeToNBT(nbt);
+			NetworkHandler.INSTANCE.sendTo(new PacketSyncBirthsignData(birthsignName, nbt), player);
 		}
 	}
 

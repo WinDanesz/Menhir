@@ -77,49 +77,69 @@ public class CommandGetBirthsign extends CommandBase {
 		}
 
 		EntityPlayerMP player;
-		if (args.length == 1) {
-			if (sender instanceof EntityPlayerMP) {
-				player = (EntityPlayerMP) sender;
-			} else {
-				throw new CommandException("You must specify a player from the console.");
-			}
-		} else {
+		if (args.length >= 1 && !"positions".equals(args[0])) {
 			try {
 				player = getPlayer(server, sender, args[0]);
 			} catch (PlayerNotFoundException e) {
+				// If argument is not a player, maybe they meant themselves if args.length == 0,
+				// but here we are in the "args.length >= 1" block.
+				// Actually, logic below handles args.length == 0 check at start.
+				// If args[0] is not a player, throw exception.
 				throw new CommandException("Player not found: " + args[0]);
 			}
-		}
-		IBirthsignData data = BirthsignDataProvider.get(player);
-		String birthsignName = data != null ? data.getBirthsign() : "";
-		if (birthsignName == null || birthsignName.isEmpty()) {
-			sender.sendMessage(new TextComponentString(player.getName() + " has no birthsign assigned."));
+		} else if (sender instanceof EntityPlayerMP) {
+			player = (EntityPlayerMP) sender;
 		} else {
-			net.minecraftforge.registries.IForgeRegistry<Birthsign> registry = GameRegistry.findRegistry(Birthsign.class);
-			Birthsign birthsign = Birthsign.registry.getValue(new net.minecraft.util.ResourceLocation(birthsignName));
+			throw new CommandException("You must specify a player from the console.");
+		}
 
-			// Get the localized birthsign name for display
-			String display = birthsignName;
-			if (birthsign != null) {
-				// Extract the birthsign name without modid prefix for translation
-				String birthsignNameForTranslation = birthsignName;
-				if (birthsignName.contains(":")) {
-					birthsignNameForTranslation = birthsignName.split(":")[1];
+		IBirthsignData data = BirthsignDataProvider.get(player);
+		java.util.Map<String, String> traits = data != null ? data.getAllTraits() : Collections.emptyMap();
+		
+		if (traits.isEmpty()) {
+			sender.sendMessage(new TextComponentString(player.getName() + " has no traits assigned."));
+		} else {
+			sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "Traits for " + player.getName() + ":"));
+			
+			for (java.util.Map.Entry<String, String> entry : traits.entrySet()) {
+				String category = entry.getKey();
+				String traitId = entry.getValue();
+				
+				if (traitId == null || traitId.isEmpty()) continue;
+				
+				Birthsign trait = Birthsign.registry.getValue(new net.minecraft.util.ResourceLocation(traitId));
+				String display = traitId;
+				
+				if (trait != null) {
+					String traitNameForTranslation = traitId;
+					if (traitId.contains(":")) {
+						traitNameForTranslation = traitId.split(":")[1];
+					}
+					// Attempt to translate, fallback to raw name if needed
+					// Assuming generic key format: "birthsign.name.name" - might need "race.name.name" in future?
+					// For now keeping consistent with existing lang keys which seem to be "birthsign.<id>.name"
+					display = Menhir.proxy.translate("birthsign." + traitNameForTranslation + ".name");
 				}
-
-				// Get the localized birthsign name
-				display = Menhir.proxy.translate(Menhir.MODID + "." + birthsignNameForTranslation + ".name");
+				
+				// Capitalize category for display
+				String categoryDisplay = category.substring(0, 1).toUpperCase() + category.substring(1);
+				
+				// Show charges for this specific trait
+				String chargesInfo = "";
+				if (trait != null) {
+					chargesInfo = String.format(" (Active: %d, Passive: %d)", trait.active_daily_uses, trait.passive_daily_uses);
+				}
+				
+				sender.sendMessage(new TextComponentString(TextFormatting.AQUA + "  " + categoryDisplay + ": " + TextFormatting.WHITE + display + TextFormatting.GRAY + chargesInfo));
 			}
 
-			sender.sendMessage(new TextComponentString(player.getName() + "'s birthsign: " + display));
-
-			// Show charges status
+			// Show charges status (global pool)
 			String chargesStatus = BirthsignEffectManager.getBirthsignChargesStatus(player);
-			sender.sendMessage(new TextComponentString("Active Charges: " + chargesStatus));
+			sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Active Charges: " + TextFormatting.WHITE + chargesStatus));
 
-			// Show passive charges status
+			// Show passive charges status (global pool)
 			String passiveChargesStatus = BirthsignEffectManager.getBirthsignPassiveChargesStatus(player);
-			sender.sendMessage(new TextComponentString("Passive Charges: " + passiveChargesStatus));
+			sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Passive Charges: " + TextFormatting.WHITE + passiveChargesStatus));
 		}
 	}
 

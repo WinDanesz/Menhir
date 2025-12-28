@@ -19,6 +19,7 @@ import net.minecraft.util.text.Style;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
@@ -30,6 +31,7 @@ public class ClientProxy extends CommonProxy {
     private static final int TOOLTIP_WRAP_WIDTH = 140;
     public static KeyBinding KEY_ACTIVATE_POWER;
     public static KeyBinding KEY_SHOW_BIRTHSIGN;
+    public static KeyBinding KEY_ACTIVATE_RADIAL_MENU;
 
     public void init() {
         registerKeybindings();
@@ -38,6 +40,26 @@ public class ClientProxy extends CommonProxy {
 
         // Load custom language files from config/menhir/lang/
         CustomLangLoader.loadCustomLangFiles();
+    }
+
+    @SubscribeEvent
+    public static void handleKeys(net.minecraftforge.fml.common.gameevent.InputEvent ev) {
+        Minecraft mc = Minecraft.getMinecraft();
+
+        if (!com.windanesz.menhir.Settings.clientSettings.radial_menu_enabled) {
+            return;
+        }
+
+        while (KEY_ACTIVATE_RADIAL_MENU.isPressed()) {
+            if (mc.currentScreen == null) {
+                 mc.displayGuiScreen(new com.windanesz.menhir.client.gui.GuiRadialMenu());
+            }
+        }
+    }
+
+    public static void wipeOpen() {
+        while (KEY_ACTIVATE_RADIAL_MENU.isPressed()) {
+        }
     }
 
     @Override
@@ -75,6 +97,9 @@ public class ClientProxy extends CommonProxy {
 
         KEY_SHOW_BIRTHSIGN = new KeyBinding("key.menhir.show_birthsign", Keyboard.KEY_B, "key.menhir.category");
         ClientRegistry.registerKeyBinding(KEY_SHOW_BIRTHSIGN);
+
+        KEY_ACTIVATE_RADIAL_MENU = new KeyBinding("key.menhir.open_radial_menu", Keyboard.KEY_R, "key.menhir.category");
+        ClientRegistry.registerKeyBinding(KEY_ACTIVATE_RADIAL_MENU);
     }
 
 

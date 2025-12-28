@@ -49,8 +49,9 @@ public class CommandPlaceMenhirStone extends CommandBase {
 
 			// Get all registered menhirs from the registry
 			if (Birthsign.registry != null) {
-				for (ResourceLocation key : Birthsign.registry.getKeys()) {
-					completions.add(key.toString()); // This will include modid:name format
+				for (Birthsign birthsign : Birthsign.registry.getValues()) {
+					// Show tab completions for all registered traits/birthsigns
+					completions.add(birthsign.getRegistryName().toString());
 				}
 			}
 
@@ -90,7 +91,7 @@ public class CommandPlaceMenhirStone extends CommandBase {
 
 		// Check if the birthsign exists
 		if (!isValidBirthsign(birthsignName)) {
-			throw new CommandException("Invalid birthsign name: " + birthsignName);
+			throw new CommandException("Invalid birthsign/trait name: " + birthsignName);
 		}
 
 		// Check if the area is clear for all three blocks
@@ -220,8 +221,10 @@ public class CommandPlaceMenhirStone extends CommandBase {
 		// Parse as a ResourceLocation and check if it exists in the registry
 		try {
 			ResourceLocation resourceLocation = new ResourceLocation(birthsignName);
-			if (Birthsign.registry != null && Birthsign.registry.containsKey(resourceLocation)) {
-				return true;
+			if (Birthsign.registry != null) {
+				Birthsign bs = Birthsign.registry.getValue(resourceLocation);
+				// Check if it exists (allow any category)
+				return bs != null;
 			}
 		} catch (Exception e) {
 			// Invalid ResourceLocation format

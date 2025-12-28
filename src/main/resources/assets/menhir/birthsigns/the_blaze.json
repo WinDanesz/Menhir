@@ -13,6 +13,7 @@
   "active": [
     {
       "effect": {
+        "ability_name": "Fireball",
         "type": "blaze_fireball",
         "speed_multiplier": 1.2,
         "damage_multiplier": 1.5,

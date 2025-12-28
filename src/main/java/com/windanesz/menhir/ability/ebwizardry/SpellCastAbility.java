@@ -1,6 +1,7 @@
 package com.windanesz.menhir.ability.ebwizardry;
 
 import com.windanesz.menhir.Menhir;
+import com.windanesz.menhir.ability.AbstractActiveAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.util.ParameterUtils;
 import electroblob.wizardry.data.WizardData;
@@ -9,13 +10,14 @@ import electroblob.wizardry.util.SpellModifiers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class SpellCastAbility implements IBirthsignActiveAbility {
+public class SpellCastAbility extends AbstractActiveAbility {
 
 	private final String spellName;
 	private final float potency;
@@ -41,6 +43,26 @@ public class SpellCastAbility implements IBirthsignActiveAbility {
 		float range = (float) ParameterUtils.getDoubleParameter(params, "range", 1.0);
 		float cooldown = (float) ParameterUtils.getDoubleParameter(params, "cooldown", 1.0);
 		return new SpellCastAbility(spell, potency, duration, blast, range, cooldown);
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getIcon() {
+		if (super.getIcon() != null) return super.getIcon();
+		if (spellName != null && !spellName.isEmpty()) {
+			Spell spell = Spell.get(spellName);
+			if (spell != null) return spell.getIcon();
+		}
+		return null;
+	}
+
+	@Override
+	public String getUnlocalizedName() {
+		if (super.getUnlocalizedName() != null && !super.getUnlocalizedName().isEmpty()) return super.getUnlocalizedName();
+		if (spellName != null && !spellName.isEmpty()) {
+			return "spell." + spellName;
+		}
+		return "";
 	}
 
 	@Override

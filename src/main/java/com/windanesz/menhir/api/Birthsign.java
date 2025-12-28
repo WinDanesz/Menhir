@@ -11,6 +11,7 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 	public static IForgeRegistry<Birthsign> registry;
 
 	public String name;
+	public String category = "birthsign";
 	public List<BirthsignEffect> passive;
 	public List<BirthsignEffect> active;
 

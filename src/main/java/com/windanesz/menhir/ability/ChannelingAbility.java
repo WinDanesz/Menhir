@@ -16,7 +16,7 @@ import java.util.Map;
  * 2. Override executeAbility() to implement the actual ability logic
  * 3. Optionally override canActivate() for custom activation checks
  */
-public abstract class ChannelingAbility implements IBirthsignActiveAbility {
+public abstract class ChannelingAbility extends AbstractActiveAbility {
 	
 	protected final int channelingTicks;
 	

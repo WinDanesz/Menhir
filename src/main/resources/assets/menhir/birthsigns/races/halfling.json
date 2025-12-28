@@ -1,0 +1,34 @@
+{
+  "name": "halfling",
+  "category": "race",
+  "active_daily_uses": 1,
+  "passive_daily_uses": 0,
+  "passive": [
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "generic.maxHealth",
+        "amount": -3.0,
+        "operation": 0
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "artemislib.entityHeight",
+        "amount": -0.2,
+        "operation": 1
+      }
+    },
+    {
+      "effect": {
+        "type": "attribute_modifier",
+        "attribute": "artemislib.entityWidth",
+        "amount": -0.2,
+        "operation": 1
+      }
+    }
+  ],
+  "active": [
+  ]
+}

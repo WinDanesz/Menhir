@@ -63,7 +63,10 @@ public class GuiBirthsign extends GuiScreen {
 		// Get all available birthsigns for browsing
 		this.allBirthsigns = new ArrayList<>();
 		for (Birthsign birthsign : Birthsign.registry.getValues()) {
-			this.allBirthsigns.add(birthsign);
+			// Only show items that are actual birthsigns in this GUI (category is null or "birthsign")
+			if (birthsign.category == null || "birthsign".equals(birthsign.category)) {
+				this.allBirthsigns.add(birthsign);
+			}
 		}
 		
 		// In selection mode, always start browsing

@@ -44,6 +44,9 @@ public class AbilityFactory {
 	public static IBirthsignActiveAbility create(String type, Map<String, Object> params, String birthsignName) {
 		BiFunction<Map<String, Object>, String, IBirthsignActiveAbility> factory = FACTORIES.get(type);
 		if (factory == null) throw new IllegalArgumentException("Unknown ability type: " + type);
-		return factory.apply(params, birthsignName);
+		IBirthsignActiveAbility ability = factory.apply(params, birthsignName);
+		ability.setParentName(birthsignName);
+		ability.configure(params);
+		return ability;
 	}
 } 

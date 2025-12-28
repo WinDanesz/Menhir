@@ -10,6 +10,12 @@ public interface IBirthsignData {
 
 	void setBirthsign(String birthsign);
 
+	void setTrait(String category, String traitId);
+
+	String getTrait(String category);
+
+	java.util.Map<String, String> getAllTraits();
+
 	int getInt(String key);
 
 	void setInt(String key, int value);

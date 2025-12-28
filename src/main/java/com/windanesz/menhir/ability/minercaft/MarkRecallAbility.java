@@ -1,5 +1,6 @@
 package com.windanesz.menhir.ability.minercaft;
 
+import com.windanesz.menhir.ability.AbstractActiveAbility;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
 import com.windanesz.menhir.capability.BirthsignDataProvider;
 import com.windanesz.menhir.eventhandler.ChannelingManager;
@@ -14,7 +15,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class MarkRecallAbility implements IBirthsignActiveAbility {
+public class MarkRecallAbility extends AbstractActiveAbility {
 
     private final int channelingTicks;
     private final double maxDistance;
