@@ -22,6 +22,55 @@ Most active abilities support the following common property:
 
 -   `chargeup`: (Integer) The time in ticks the player must channel the ability before it activates. A value of `0` makes the activation instant, but for instant activations it can also be omitted.
 
+### Active Ability Customization
+
+You can further customize how active abilities appear and behave in the radial selection menu using these properties:
+
+-   `ability_name`: (String, Optional) A grouping key. Active abilities with the same `ability_name` will be grouped together in the radial menu as a single entry. When selected and activated, all abilities in the group will trigger simultaneously.
+-   `name`: (String, Optional) A custom unlocalized name for the ability (e.g., `ability.my_mod.mega_fireball`). This is used for the display name in the radial menu.
+-   `icon`: (String, Optional) A resource location path to a custom icon texture for the radial menu (e.g., `my_mod:textures/gui/icons/fireball.png`). If not specified, the menu will try to use the birthsign's icon or a default fallback.
+
+### Example: Grouping Abilities
+
+You can create complex active abilities by grouping multiple effects together. In this example, the "Might of the Forge" ability applies both Strength and Speed simultaneously when activated.
+
+```json
+{
+  "name": "the_forge",
+  "active": [
+    {
+      "effect": {
+        "ability_name": "Forged by Fire",
+        "type": "repair_item",
+        "restore_percent": 0.25
+      }
+    },
+    {
+      "effect": {
+        "ability_name": "Might of the Forge",
+        "type": "potion_effect",
+        "potioneffect": "strength",
+        "amplifier": 1,
+        "duration": 300
+      }
+    },
+    {
+      "effect": {
+        "ability_name": "Might of the Forge",
+        "type": "potion_effect",
+        "potioneffect": "minecraft:speed",
+        "amplifier": 1,
+        "duration": 300
+      }
+    }
+  ]
+}
+```
+
+In the radial menu, the player will see two entries:
+1.  **Forged by Fire**: Triggers the item repair.
+2.  **Might of the Forge**: Triggers **both** the Strength and Speed potion effects at the same time.
+
 ---
 
 ## Minecraft Abilities (`minercaft`)
