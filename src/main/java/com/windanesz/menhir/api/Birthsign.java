@@ -1,5 +1,6 @@
 package com.windanesz.menhir.api;
 
+import com.windanesz.menhir.Menhir;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -45,6 +46,10 @@ public class Birthsign extends IForgeRegistryEntry.Impl<Birthsign> {
 	 * This can return null
 	 */
 	public static Birthsign getBirthsignFromString(String birthsign) {
+		if (!birthsign.contains(":")) {
+			// Assume it's from our mod if no domain is specified
+			return registry.getValue(new net.minecraft.util.ResourceLocation(Menhir.MODID, birthsign));
+		}
 		return registry.getValue(new net.minecraft.util.ResourceLocation(birthsign));
 	}
 

@@ -1,6 +1,5 @@
 package com.windanesz.menhir.client.gui;
 
-import com.google.common.collect.Lists;
 import com.windanesz.menhir.Menhir;
 import com.windanesz.menhir.Settings;
 import com.windanesz.menhir.api.IBirthsignActiveAbility;
@@ -29,7 +28,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.List;
 
 /**
@@ -256,6 +254,13 @@ public class GuiRadialMenu extends GuiScreen {
             } else {
                 name = "Unknown Ability";
             }
+            
+            // Add charge info
+            String category = BirthsignEffectManager.getAbilityCategory(abilityOver);
+            int current = BirthsignEffectManager.getBirthsignRemainingCharges(mc.player, category);
+            int max = BirthsignEffectManager.getBirthsignMaxCharges(mc.player, category);
+            name += " (" + current + "/" + max + ")";
+            
             drawCenteredString(fontRenderer, name, width / 2, (height - fontRenderer.FONT_HEIGHT) / 2, 0xFFFFFFFF);
             GlStateManager.color(1.0f, 1.0f, 1.0f);
             GlStateManager.popMatrix();

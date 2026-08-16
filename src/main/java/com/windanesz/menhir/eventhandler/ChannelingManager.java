@@ -126,7 +126,7 @@ public class ChannelingManager {
 				
 				if (success) {
 					// Consume a charge only if the ability succeeded
-					BirthsignEffectManager.decrementBirthsignRemainingCharges(player);
+					BirthsignEffectManager.decrementBirthsignRemainingCharges(player, data.ability);
 					
 					// Sync charges to client
 					if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {

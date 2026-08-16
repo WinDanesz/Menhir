@@ -1,5 +1,6 @@
 {
   "name": "wizard",
+  "category": "class",
   "active_daily_uses": 1,
   "passive": [
     {
